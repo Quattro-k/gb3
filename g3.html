@@ -1,0 +1,1431 @@
+<!DOCTYPE html>  
+  
+<html lang="ja">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">  
+<title>GB3 パーツナビ</title>  
+<meta name="apple-mobile-web-app-capable" content="yes">  
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+<meta name="apple-mobile-web-app-title" content="GB3ナビ">  
+<meta name="theme-color" content="#0b0e17">  
+<link rel="manifest" id="manifest-link">  
+<link rel="apple-touch-icon" id="apple-icon">  
+<style>  
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}  
+:root{--bg:#0b0e17;--s1:#131825;--s2:#1a2030;--bd:#1e2d45;--ac:#00d4ff;--ac2:#ff6b35;--gold:#ffc940;--grn:#3dffaa;--dlc:#c084fc;--dim:#4a6080;--txt:#c8dcf0}  
+body{background:var(--bg);color:var(--txt);font-family:'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif;min-height:100vh}  
+.app{max-width:500px;margin:0 auto}  
+header{background:linear-gradient(135deg,#0b0e17,#0d1928);border-bottom:1px solid var(--bd);padding:12px 16px;position:sticky;top:0;z-index:50;box-shadow:0 2px 16px rgba(0,212,255,.08)}  
+.h-inner{display:flex;align-items:center;gap:10px}  
+.h-hex{width:34px;height:34px;background:linear-gradient(135deg,var(--ac),#0050ff);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}  
+.h-title{font-family:monospace;font-size:14px;font-weight:900;color:var(--ac);letter-spacing:2px;text-shadow:0 0 10px rgba(0,212,255,.5)}  
+.h-sub{font-size:9px;color:var(--dim);letter-spacing:3px;margin-top:1px}  
+/* MODE TABS */  
+.mode-tabs{display:flex;border-bottom:1px solid var(--bd);margin-top:10px}  
+.mode-tab{flex:1;padding:7px 4px;text-align:center;font-size:11px;font-weight:700;font-family:inherit;color:var(--dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s}  
+.mode-tab.on{color:var(--ac);border-bottom-color:var(--ac)}  
+/* BODY */  
+.body{padding:14px 14px 60px}  
+.steps{display:flex;gap:4px;margin-bottom:14px}  
+.step{flex:1;height:3px;border-radius:2px;background:var(--bd);transition:background .3s}  
+.step.done{background:var(--ac)}  
+.step.active{background:var(--ac2)}  
+.bc{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim);margin-bottom:12px;flex-wrap:wrap}  
+.bc-link{cursor:pointer;text-decoration:underline;color:var(--dim)}  
+.bc-now{color:var(--ac);font-weight:700}  
+.bc-sep{color:var(--bd)}  
+.sec-lbl{font-size:10px;letter-spacing:3px;color:var(--dim);display:flex;align-items:center;gap:8px;margin-bottom:10px}  
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--bd)}  
+/* SEARCH */  
+.search-wrap{position:relative;margin-bottom:10px}  
+.search-input{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--txt);font-family:inherit;font-size:15px;padding:11px 40px 11px 14px;outline:none;transition:border .2s}  
+.search-input:focus{border-color:var(--ac)}  
+.search-input::placeholder{color:var(--dim)}  
+.search-ico{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}  
+/* ROW FILTER */  
+.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}  
+.tab{padding:5px 10px;border-radius:16px;border:1px solid var(--bd);background:var(--s1);color:var(--dim);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}  
+.tab.on{background:rgba(0,212,255,.1);border-color:var(--ac);color:var(--ac);font-weight:700}  
+/* GRID */  
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}  
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:11px;cursor:pointer;transition:all .15s}  
+.card:active{background:rgba(0,212,255,.07);border-color:var(--ac);transform:scale(.98)}  
+.card-name{font-size:12px;font-weight:700;line-height:1.4}  
+.card-sub{font-size:10px;color:var(--dim);margin-top:2px}  
+.card-dlc{font-size:9px;color:var(--dlc);margin-top:2px}  
+.no-result{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;grid-column:1/-1}  
+/* SEL BOX */  
+.sel-box{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.25);border-radius:10px;padding:12px 14px;margin-bottom:14px}  
+.sel-lbl{font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:3px}  
+.sel-name{font-size:16px;font-weight:700;color:var(--ac);line-height:1.3}  
+/* PART GRID */  
+.part-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}  
+.part-btn{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:12px 6px;cursor:pointer;text-align:center;color:var(--txt);font-family:inherit;transition:all .15s}  
+.part-btn.no-data{opacity:.35;cursor:default;border-style:dashed}  
+.part-btn:not(.no-data):active{background:rgba(255,107,53,.1);border-color:var(--ac2)}  
+.part-ico{font-size:20px;display:block;margin-bottom:4px}  
+.part-lbl{font-size:11px;font-weight:700}  
+.part-note{font-size:9px;color:var(--dim);margin-top:2px}  
+/* BACK BTN */  
+.back-btn{display:flex;align-items:center;gap:7px;background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:9px 13px;color:var(--txt);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:14px;transition:border .2s;width:100%;text-align:left}  
+.back-btn:active{border-color:var(--ac)}  
+/* RESULT */  
+.result-card{background:var(--s1);border-radius:11px;padding:15px;margin-bottom:11px}  
+.result-card.ac-border{border:1px solid rgba(0,212,255,.35)}  
+.result-card.gold-border{border:1px solid rgba(255,201,64,.35)}  
+.r-title{font-size:13px;font-weight:700;color:var(--ac);margin-bottom:11px;padding-bottom:9px;border-bottom:1px solid var(--bd)}  
+.r-title.gold{color:var(--gold)}  
+.r-sec{font-size:9px;letter-spacing:2px;color:var(--dim);margin:12px 0 7px}  
+.r-sec:first-child{margin-top:0}  
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:5px;padding:5px 9px;font-size:11px;margin:3px;border:1px solid}  
+.tag-shop{background:rgba(61,255,170,.08);border-color:rgba(61,255,170,.4);color:var(--grn)}  
+.tag-derive{background:rgba(255,201,64,.08);border-color:rgba(255,201,64,.4);color:var(--gold)}  
+.tag-drop{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.4);color:var(--ac)}  
+.tag-dlc{background:rgba(192,132,252,.08);border-color:rgba(192,132,252,.4);color:var(--dlc)}  
+.derive-box{background:var(--s2);border:1px solid var(--bd);border-radius:7px;overflow:hidden}  
+.d-row{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-bottom:1px solid var(--bd)}  
+.d-row:last-child{border-bottom:none}  
+.d-num{background:var(--ac2);color:#000;font-size:10px;font-weight:900;min-width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}  
+.d-text{font-size:12px;line-height:1.6}  
+.d-from{color:var(--gold);font-weight:700}  
+.d-arrow{color:var(--ac2);margin:0 4px}  
+.d-to{color:var(--ac);font-weight:700}  
+.info-box{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:7px;padding:8px 11px;font-size:11px;color:var(--dim);margin-top:7px;line-height:1.7}  
+.info-box strong{color:var(--ac)}  
+.src-row{margin-bottom:9px}  
+.src-name{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:3px}  
+/* WEAPON CATEGORY FILTER */  
+.cat-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}  
+.cat-tab{padding:5px 10px;border-radius:16px;border:1px solid var(--bd);background:var(--s1);color:var(--dim);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}  
+.cat-tab.on{background:rgba(255,107,53,.1);border-color:var(--ac2);color:var(--ac2);font-weight:700}  
+/* SRC LINK */  
+.src-link{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px 11px;margin-bottom:6px;cursor:pointer;transition:border .15s}  
+.src-link:active{border-color:var(--ac)}  
+.src-link-name{font-size:12px;font-weight:700;color:var(--gold)}  
+.src-link-tags{display:flex;gap:4px;align-items:center;flex-shrink:0;margin-left:8px}  
+.src-link-arr{color:var(--dim);font-size:12px;margin-left:4px}  
+/* CRAFT PLAN */  
+.plan-fab{position:fixed;bottom:20px;right:20px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--ac2),#ff4500);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,53,.5);z-index:100;display:flex;align-items:center;justify-content:center;transition:transform .15s}  
+.plan-fab:active{transform:scale(.92)}  
+.plan-badge{position:absolute;top:-3px;right:-3px;background:var(--gold);color:#000;border-radius:50%;width:18px;height:18px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center}  
+.plan-panel{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;flex-direction:column;justify-content:flex-end}  
+.plan-sheet{background:var(--s1);border-radius:18px 18px 0 0;max-height:90vh;display:flex;flex-direction:column;padding:0}  
+.plan-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--bd)}  
+.plan-title{font-size:14px;font-weight:900;color:var(--ac2);letter-spacing:1px}  
+.plan-close{background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:4px}  
+.plan-body{overflow-y:auto;padding:12px 16px 20px;flex:1}  
+.plan-empty{text-align:center;padding:30px;color:var(--dim);font-size:13px}  
+/* CRAFT ITEM */  
+.craft-goal{background:var(--s2);border:1px solid rgba(255,107,53,.3);border-radius:10px;margin-bottom:12px;overflow:hidden}  
+.craft-goal-header{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--bd)}  
+.craft-goal-name{flex:1;font-size:13px;font-weight:700;color:var(--ac2)}  
+.craft-goal-del{background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer;padding:2px 6px}  
+.craft-tree{padding:6px 0}  
+.craft-node{display:flex;align-items:flex-start;gap:8px;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.03)}  
+.craft-node:last-child{border-bottom:none}  
+.craft-node.depth-1{padding-left:24px}  
+.craft-node.depth-2{padding-left:38px}  
+.craft-node.done .craft-node-name{color:var(--dim);text-decoration:line-through}  
+.craft-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--dim);background:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px;font-size:10px;color:transparent}  
+.craft-check.checked{background:var(--grn);border-color:var(--grn);color:#000}  
+.craft-node-body{flex:1}  
+.craft-node-name{font-size:12px;font-weight:700;line-height:1.4}  
+.craft-node-how{font-size:10px;color:var(--dim);margin-top:2px}  
+.craft-node-link{font-size:10px;color:var(--ac);text-decoration:underline;cursor:pointer;margin-top:2px;display:inline-block}  
+.craft-progress{height:3px;background:var(--bd);border-radius:2px;margin:0 12px 8px}  
+.craft-progress-bar{height:100%;background:var(--grn);border-radius:2px;transition:width .3s}  
+/* ADD TO PLAN BTN */  
+.add-plan-btn{display:flex;align-items:center;gap:6px;width:100%;background:rgba(255,107,53,.08);border:1px dashed rgba(255,107,53,.4);border-radius:8px;padding:9px 13px;color:var(--ac2);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:10px;justify-content:center;transition:all .15s}  
+.add-plan-btn:active{background:rgba(255,107,53,.18)}  
+</style>  
+</head>  
+<body>  
+<div class="app">  
+<header>  
+  <div class="h-inner">  
+    <div class="h-hex">⚙</div>  
+    <div>  
+      <div class="h-title">GUNDAM BREAKER 3</div>  
+      <div class="h-sub">PARTS NAVIGATOR</div>  
+    </div>  
+  </div>  
+  <div class="mode-tabs">  
+    <button class="mode-tab on" id="mt-gunpla" onclick="switchMode('gunpla')">🤖 機体パーツ</button>  
+    <button class="mode-tab" id="mt-melee" onclick="switchMode('melee')">⚔️ 近接武器</button>  
+    <button class="mode-tab" id="mt-shoot" onclick="switchMode('shoot')">🔫 射撃武器</button>  
+    <button class="mode-tab" id="mt-shield" onclick="switchMode('shield')">🛡 シールド</button>  
+  </div>  
+</header>  
+<div class="body">  
+  <div class="bc" id="bc"></div>  
+  <div class="steps" id="steps-wrap" style="display:none">  
+    <div class="step" id="st1"></div>  
+    <div class="step" id="st2"></div>  
+    <div class="step" id="st3"></div>  
+  </div>  
+  
+  <!-- ===== 機体モード ===== -->  
+  
+  <div id="pg-gunpla">  
+    <div class="sec-lbl">作りたい機体を選ぶ</div>  
+    <div class="search-wrap">  
+      <input class="search-input" id="g-search" type="search" placeholder="機体名で検索..." oninput="renderGGrid()">  
+      <span class="search-ico">🔍</span>  
+    </div>  
+    <div class="tabs" id="g-tabs"></div>  
+    <div class="grid" id="g-grid"></div>  
+  </div>  
+  <div id="pg-part" style="display:none">  
+    <button class="back-btn" onclick="goTo('gunpla')">← 機体選択に戻る</button>  
+    <div class="sel-box"><div class="sel-lbl">選択中の機体</div><div class="sel-name" id="sel-gname"></div></div>  
+    <div class="sec-lbl">部位を選ぶ</div>  
+    <div class="part-grid" id="part-grid"></div>  
+  </div>  
+  <div id="pg-gresult" style="display:none">  
+    <button class="back-btn" onclick="goTo('part')">← 部位選択に戻る</button>  
+    <div id="g-result"></div>  
+  </div>  
+  
+  <!-- ===== 武器/シールドモード ===== -->  
+  
+  <div id="pg-weapons" style="display:none">  
+    <div class="sec-lbl" id="w-sec-lbl">武器を選ぶ</div>  
+    <div class="search-wrap">  
+      <input class="search-input" id="w-search" type="search" placeholder="武器名・機体名で検索..." oninput="renderWGrid()">  
+      <span class="search-ico">🔍</span>  
+    </div>  
+    <div class="cat-tabs" id="w-cats"></div>  
+    <div class="grid" id="w-grid"></div>  
+  </div>  
+  <div id="pg-wresult" style="display:none">  
+    <button class="back-btn" id="w-back-btn" onclick="goTo('weapons')">← 一覧に戻る</button>  
+    <div id="w-result"></div>  
+  </div>  
+</div>  
+  
+<!-- クラフトプランFAB -->  
+  
+<button class="plan-fab" onclick="openPlan()" id="plan-fab" title="クラフトプラン">  
+  📋<span class="plan-badge" id="plan-badge" style="display:none">0</span>  
+</button>  
+  
+<!-- クラフトプランパネル -->  
+  
+<div class="plan-panel" id="plan-panel" style="display:none" onclick="closePlanOutside(event)">  
+  <div class="plan-sheet" id="plan-sheet">  
+    <div class="plan-header">  
+      <div class="plan-title">📋 クラフトプラン</div>  
+      <button class="plan-close" onclick="closePlan()">✕</button>  
+    </div>  
+    <div class="plan-body" id="plan-body"></div>  
+  </div>  
+</div>  
+</div>  
+  
+<script>  
+// =============================================  
+// 機体データ  
+// d は派生合成レシピ配列。各レシピは配列で「必要な派生元機体名」のリスト。  
+// 部位指定がある場合は名前に「（ヘッド）」等を含める。  
+// parts: 派生合成で作れる部位リスト。指定なしの行は全部位OKとみなす。  
+// partsSpec: 特定部位のみ派生元が指定されているレシピ (部位→レシピ配列)  
+//  
+// 設計方針：  
+//   - サイトに部位指定が"ない"レシピ → 全部位 (HEAD/BODY/ARM/LEG/BACK) に適用  
+//   - サイトに（ヘッド）等部位指定がある → その部位のみに適用  
+//   - DLC機体で派生元なし → 全部位DLC扱い  
+// =============================================  
+var PARTS_ALL = ['HEAD','BODY','ARM','LEG','BACK'];  
+  
+// partsSpecの構造:  
+// { HEAD: [['派生元A','派生元B'], ...], BACK: [...] }  
+// dは「全部位共通」のレシピ (部位指定なし行)  
+  
+var GD = [  
+// ア行  
+{n:'アカツキ',r:'ア',d:[['ストライクルージュ','フリーダムガンダム']]},  
+{n:'アカツキ（オオワシ装備）',r:'ア',ps:{BACK:[['ストライクルージュ+I.W.S.P.（バックパック）','フリーダムガンダム（バックパック）']]}},  
+{n:'アカツキ（シラヌイ装備）',r:'ア',ps:{BACK:[['ストライクルージュ+I.W.S.P.（バックパック）']]}},  
+{n:'アストレイグリーンフレーム',r:'ア',d:[['アストレイブルーフレーム','アストレイレッドフレーム']]},  
+{n:'アストレイゴールドフレーム天',r:'ア',d:[['アストレイレッドフレーム','アストレイブルーフレームセカンドリバイ']]},  
+{n:'アストレイゴールドフレーム天ミナ',r:'ア',ps:{ARM:[['アストレイゴールドフレーム天（アーム）','アストレイブルーフレームセカンドリバイ（アーム）']],LEG:[['アストレイゴールドフレーム天（レッグ）','アストレイブルーフレームセカンドリバイ（レッグ）']]}},  
+{n:'アストレイブルーフレーム',r:'ア',d:[['アストレイレッドフレーム','ガンダムエクシア']]},  
+{n:'アストレイブルーフレームセカンドリバイ',r:'ア',d:[['アストレイブルーフレーム','アストレイレッドフレーム']]},  
+{n:'アストレイレッドフレーム',r:'ア',d:[['ガンダムEz8','陸戦型ガンダム']]},  
+{n:'アストレイレッドフレーム改',r:'ア',ps:{LEG:[['アストレイレッドフレーム（レッグ）','アストレイゴールドフレーム天（レッグ）']],BACK:[['アストレイレッドフレーム（バックパック）','アストレイゴールドフレーム天（バックパック）']]}},  
+{n:'アストレイレッドドラゴン',r:'ア',ps:{HEAD:[['アストレイブルーフレームセカンドリバイ（ヘッド）','アストレイレッドフレーム（ヘッド）']],BACK:[['アストレイブルーフレームセカンドリバイ（バックパック）','アストレイレッドフレーム改（バックパック）']]}},  
+{n:'アストレイレッドフレーム（フライトユニット装備）',r:'ア',ps:{BACK:[['アストレイレッドフレーム（バックパック）','アストレイブルーフレーム（バックパック）']]}},  
+{n:'アッガイ',r:'ア',ps:{HEAD:[['ザクⅡ（ヘッド）']],BODY:[['ザクⅡS','ズゴック']],ARM:[['ザクⅡS','ズゴック']],LEG:[['ザクⅡS','ズゴック']],BACK:[['ザクⅡS','ズゴック']]}},  
+{n:'アルケーガンダム',r:'ア',dlc:1},  
+{n:'アルトロンガンダム',r:'ア',d:[['ガンダムエピオン','シェンロンガンダム（EW版）']]},  
+{n:'Ex-Sガンダム',r:'ア',d:[['Sガンダム','ファッツ']]},  
+{n:'イージスガンダム',r:'ア',dlc:1},  
+{n:'インパルスガンダム',r:'ア',d:[['ガンダムエクシア','ストライクガンダム']]},  
+{n:'インフィニットジャスティスガンダム',r:'ア',ps:{ARM:[['ジャスティスガンダム（アーム）','フリーダムガンダム']],BACK:[['ジャスティスガンダム（バックパック）','フリーダムガンダム']],HEAD:[['ジャスティスガンダム','フリーダムガンダム']],BODY:[['ジャスティスガンダム','フリーダムガンダム']],LEG:[['ジャスティスガンダム','フリーダムガンダム']]}},  
+{n:'ヴィクトリーガンダム',r:'ア',d:[['ガンダム','ジム']]},  
+{n:'Vガンダムヘキサ',r:'ア',ps:{HEAD:[['ヴィクトリーガンダム（ヘッド）','ガンダムMk-Ⅱエゥーゴ仕様（ヘッド）']]}},  
+{n:'Vダッシュガンダム',r:'ア',ps:{BACK:[['ヴィクトリーガンダム（バックパック）','ガンダム試作1号機（バックパック）']]}},  
+{n:'ウイングガンダム',r:'ア',d:[['ヅダ']]},  
+{n:'ウイングガンダム（EW版）',r:'ア',d:[['ウイングガンダム','トールギス']]},  
+{n:'ウイングガンダムゼロ',r:'ア',ps:{HEAD:[['トールギス','トールギスⅡ（ヘッド）']],BODY:[['トールギス','トールギスⅡ（ヘッド）']],ARM:[['トールギス','トールギスⅡ（ヘッド）']],LEG:[['トールギス','トールギスⅡ（ヘッド）']],BACK:[['トールギス','トールギスⅡ（ヘッド）']]}},  
+{n:'ウイングガンダムプロトゼロ',r:'ア',d:[['ウイングガンダム','ウイングガンダム（EW版）']]},  
+{n:'エールストライクガンダム',r:'ア',ps:{BACK:[['V2ガンダム（バックパック）','バスターガンダム（バックパック）※DLC']]}},  
+// カ行  
+{n:'ガーベラ・テトラ',r:'カ',ps:{HEAD:[['ガンダム試作1号機（ヘッド）']],BODY:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],ARM:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],LEG:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],BACK:[['Vダッシュガンダム（バックパック）','ガンダム試作1号機Fb']]}},  
+{n:'カバカーリー',r:'カ',dlc:1},  
+{n:'カバカーリー（シールド装備）',r:'カ',dlc:1},  
+{n:'ガフラン',r:'カ',d:[['GNアーチャー','ジンクス']]},  
+{n:'GNアーチャー',r:'カ',ps:{BODY:[['ガンダムエクシア','ケルディムガンダム']],ARM:[['ガンダムエクシア','ケルディムガンダム']],HEAD:[['ガンダムエクシア','ケルディムガンダム']],LEG:[['ガンダムエクシア','ケルディムガンダム']],BACK:[['ダブルオーライザー（バックパック）']]}},  
+{n:'ガンキャノン',r:'カ',d:[['ガンダム','G-3ガンダム']]},  
+{n:'ガンダム',r:'カ',shop:1},  
+{n:'ガンダムEz8',r:'カ',d:[['ガンダムNT-1']]},  
+{n:'ガンダムF91',r:'カ',d:[['ガンダム','ジム']]},  
+{n:'ガンダムNT-1',r:'カ',d:[['G-3ガンダム','ジム・コマンド']]},  
+{n:'ガンダムTR-1[ヘイズル]（センサー装備）',r:'カ',ps:{HEAD:[['ジム・コマンド（ヘッド）','ブルーデスティニー1号機（ヘッド）']]}},  
+{n:'ガンダムTR-1[アドバンスド・ヘイズル]',r:'カ',ps:{HEAD:[['ガンダムTR-1（センサー装備）（ヘッド）','ペイルライダー（ヘッド）']],BODY:[['ジム・コマンド','ブルーデスティニー1号機']],ARM:[['ジム・コマンド','ブルーデスティニー1号機']],LEG:[['ジム・コマンド','ブルーデスティニー1号機']],BACK:[['ジムⅡ（バックパック）','ジム・コマンド']]}},  
+{n:'ガンダムTR-6[ウーンドウォート]',r:'カ',dlc:1},  
+{n:'ガンダムアスタロト',r:'カ',dlc:1},  
+{n:'ガンダムX',r:'カ',d:[['ヴィクトリーガンダム']]},  
+{n:'ガンダムXディバイダー',r:'カ',ps:{BACK:[['ガンダムX（バックパック）']]}},  
+{n:'ガンダムヴァーチェ',r:'カ',d:[['ガンダムエクシア','ガンダムキュリオス']]},  
+{n:'ガンダムヴァサーゴ',r:'カ',d:[['ガンダムF91','ガンダムX']]},  
+{n:'ガンダムヴァサーゴ チェストブレイク',r:'カ',d:[['ガンダムヴァサーゴ','ガンダムエピオン']]},  
+{n:'ガンダムAGE-1ノーマル',r:'カ',dlc:1,d:[['ガンダム','ジム']]},  
+{n:'ガンダムAGE-1タイタス',r:'カ',ps:{ARM:[['ガンダム（アーム）','ジム（アーム）'],['ガンダムAGE-1ノーマル（アーム）※DLC']],LEG:[['ガンダム（レッグ）','ジム（レッグ）'],['ガンダムAGE-1ノーマル（レッグ）※DLC']],BODY:[['ガンダムAGE-3ノーマル（ボディ）※DLC']],HEAD:[['ガンダム','ジム']]}},  
+{n:'ガンダムAGE-2ノーマル',r:'カ',d:[['Zガンダム','ライトニングガンダム']]},  
+{n:'ガンダムAGE-2ダブルバレット',r:'カ',ps:{ARM:[['ガンダムAGE-2ノーマル（アーム）','Zガンダム（アーム）']],LEG:[['ガンダムAGE-2ノーマル（レッグ）','Zガンダム（レッグ）']]}},  
+{n:'ガンダムAGE-2ダークハウンド',r:'カ',d:[['ガンダムAGE-2ノーマル','Zガンダム']]},  
+{n:'ガンダムAGE-3ノーマル',r:'カ',dlc:1,ps:{HEAD:[['ZプラスA1（ヘッド）']],BACK:[['ZZガンダム（バックパック）','ZプラスA1（バックパック）']]}},  
+{n:'ガンダムAGE-3フォートレス',r:'カ',ps:{BODY:[['ZプラスA1（ボディ）','ZZガンダム（ボディ）']],ARM:[['ZプラスA1（アーム）','ZZガンダム（アーム）']],LEG:[['ZプラスA1（レッグ）','ZZガンダム（レッグ）']]}},  
+{n:'ガンダムAGE-FX',r:'カ',dlc:1},  
+{n:'ガンダムエクシア',r:'カ',d:[['ガンダム','G-3ガンダム']]},  
+{n:'ガンダムエピオン',r:'カ',shop:1},  
+{n:'ガンダムキマリス',r:'カ',dlc:1},  
+{n:'ガンダムキュリオス',r:'カ',d:[['ガンダムエクシア','ガンダムG-セルフ']]},  
+{n:'ガンダムグシオン',r:'カ',dlc:1},  
+{n:'ガンダムグシオンリベイク',r:'カ',dlc:1},  
+{n:'ガンダムサンドロック（EW版）',r:'カ',d:[['ヅダ','トールギス']]},  
+{n:'ガンダムサンドロック改（EW版）',r:'カ',d:[['ウイングガンダム（EW版）','ガンダムサンドロック（EW版）']]},  
+{n:'ガンダムG-セルフ',r:'カ',d:[['ガンダム','ジム']]},  
+{n:'ガンダム試作1号機ゼフィランサス',r:'カ',d:[['ガンダムNT-1','G-3ガンダム']]},  
+{n:'ガンダム試作1号機Fb',r:'カ',d:[['ガンダム試作1号機ゼフィランサス','ガンダムMk-Ⅱエゥーゴ仕様']]},  
+{n:'ガンダム試作2号機サイサリス',r:'カ',d:[['ガンダムNT-1','陸戦型ガンダム']]},  
+{n:'ガンダム試作3号機ステイメン',r:'カ',ps:{BODY:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],ARM:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],LEG:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],HEAD:[['ヴィクトリーガンダム','ガンダム試作1号機Fb']],BACK:[['Vダッシュガンダム（バックパック）','ガンダム試作1号機Fb']]}},  
+{n:'ガンダムダブルエックス',r:'カ',d:[['V2ガンダム']]},  
+{n:'ガンダムデスサイズヘル（EW版）',r:'カ',d:[['トールギス','トールギスⅢ']]},  
+{n:'ガンダムデュナメス',r:'カ',d:[['ガンダムエクシア','ガンダムキュリオス']]},  
+{n:'ガンダムバルバトス',r:'カ',d:[['ガンダムエクシア','ガンダムG-セルフ']]},  
+{n:'ガンダムバルバトス第6形態',r:'カ',dlc:1},  
+{n:'ガンダムバルバトスルプス',r:'カ',dlc:1},  
+{n:'ガンダムヘビーアームズ（EW版）',r:'カ',d:[['トールギス','トールギスⅢ']]},  
+{n:'ガンダムMk-Ⅱ エゥーゴ仕様',r:'カ',d:[['ガンダムNT-1','ガンダム試作2号機サイサリス']]},  
+{n:'ガンダムMk-Ⅱ エゥーゴ仕様（バルカンポッド装備）',r:'カ',ps:{HEAD:[['ガンダムNT-1（ヘッド）','ガンダムMk-Ⅱエゥーゴ仕様（ヘッド）']]}},  
+{n:'ガンダムMk-Ⅱ ティターンズ仕様',r:'カ',d:[['ガンダムNT-1','ガンダム試作2号機サイサリス']]},  
+{n:'ガンダムMk-Ⅱ ティターンズ仕様（バルカンポッド装備）',r:'カ',ps:{HEAD:[['ガンダムMk-Ⅱティターンズ仕様（ヘッド）','ペイルライダー（ヘッド）']]}},  
+{n:'ガンダムローズ',r:'カ',dlc:1},  
+{n:'ガンタンク',r:'カ',ps:{HEAD:[['ガンダム（ヘッド）']],BODY:[['G-3ガンダム']],ARM:[['G-3ガンダム']],LEG:[['G-3ガンダム']],BACK:[['G-3ガンダム']]}},  
+{n:'ギャプランTR-5[フライルー]',r:'カ',d:[['Zガンダム','百式']]},  
+{n:'ギャン',r:'カ',d:[['ドム']]},  
+{n:'キュベレイ',r:'カ',d:[['ザクⅡS','ゲルググ（指揮官用）']]},  
+{n:'キュベレイMk-Ⅱ',r:'カ',d:[['キュベレイ','パラス・アテネ']]},  
+{n:'ギラ・ドーガ',r:'カ',d:[['高機動型ザク改','ザクⅡ改']]},  
+{n:'ギラ・ドーガ（レズン専用機）',r:'カ',d:[['ギラ・ドーガ','ドライセン（ユニコーンVer.）']]},  
+{n:'クシャトリヤ',r:'カ',d:[['キュベレイ','キュベレイMk-Ⅱ']]},  
+{n:'グフ',r:'カ',shop:1},  
+{n:'グフカスタム',r:'カ',d:[['グフ','ドム']]},  
+{n:'クロスボーン・ガンダムX1',r:'カ',d:[['ガンダムF91','ガンダムX']]},  
+{n:'クロスボーン・ガンダムX1改・改',r:'カ',ps:{BODY:[['ガンダムX（ボディ）','クロスボーン・ガンダムX1（ボディ）']],ARM:[['ガンダムX（アーム）','クロスボーン・ガンダムX1（アーム）']]}},  
+{n:'ゲルググ（指揮官用）',r:'カ',ps:{HEAD:[['ザクⅡ（ヘッド）']],BODY:[['ザクⅡS（ボディ）','ズゴック']],ARM:[['ザクⅡS（アーム）','ズゴック']],LEG:[['ザクⅡS（レッグ）','ズゴック']],BACK:[['ザクⅡS（バックパック）','ズゴック']]}},  
+{n:'ゲルググキャノン',r:'カ',ps:{BACK:[['ゲルググ（指揮官用）（バックパック）','ズゴック（バックパック）']]}},  
+{n:'ゲルググJ',r:'カ',d:[['ゲルググ（指揮官用）','ザクⅡS']]},  
+{n:'ケルディムガンダム',r:'カ',d:[['ガンダムデュナメス','ダブルオーガンダム']]},  
+{n:'ケルディムガンダム GNHW/R',r:'カ',ps:{ARM:[['ガンダムデュナメス（アーム）','ケルディムガンダム（アーム）']],LEG:[['ガンダムデュナメス（レッグ）','ケルディムガンダム（レッグ）']]}},  
+{n:'ケンプファー',r:'カ',d:[['グフ','グフカスタム']]},  
+{n:'高機動型ゲルググ（ジョニー・ライデン専用）',r:'カ',ps:{HEAD:[['ザクⅡ（ヘッド）']],BODY:[['ゲルググ（指揮官用）','ズゴック']],ARM:[['ゲルググ（指揮官用）','ズゴック']],LEG:[['ゲルググ（指揮官用）','ズゴック']],BACK:[['ゲルググ（指揮官用）','ズゴック']]}},  
+{n:'高機動型ザク改',r:'カ',d:[['ザクⅡ','グフ']]},  
+{n:'高機動型ザク後期型（ジョニー・ライデン専用）',r:'カ',d:[['ザクⅡ']]},  
+{n:'ゴッドガンダム',r:'カ',d:[['シャイニングガンダム','ライジングガンダム']]},  
+// サ行  
+{n:'サーペントカスタム',r:'サ',d:[['ヅダ','トールギス']]},  
+{n:'サイコザク',r:'サ',d:[['サザビー','シナンジュ']]},  
+{n:'サザビー',r:'サ',d:[['シナンジュ','ヤクト・ドーガ（ギュネイ専用機）','ヤクト・ドーガ（クェス専用機）']]},  
+{n:'G-3ガンダム',r:'サ',d:[['ジム']]},  
+{n:'ジェガン',r:'サ',d:[['ジム・カスタム','ジムⅢ']]},  
+{n:'ジェスタ',r:'サ',d:[['ジェガン','ジムⅢ']]},  
+{n:'ジェスタ・キャノン',r:'サ',d:[['ジェスタ','スタークジェガン']]},  
+{n:'シェンロンガンダム',r:'サ',d:[['ゴッドガンダム','マスターガンダム']]},  
+{n:'シェンロンガンダム（EW版）',r:'サ',d:[['ウイングガンダム','シェンロンガンダム']]},  
+{n:'ジ・O',r:'サ',d:[['ドライセン（ユニコーンVer.）','パラス・アテネ']]},  
+{n:'ジオング',r:'サ',d:[['ゲルググ（指揮官用）']]},  
+{n:'シナンジュ',r:'サ',d:[['ガンダムMk-Ⅱエゥーゴ仕様','ユニコーンガンダム']]},  
+{n:'ザクⅡ',r:'サ',shop:1},  
+{n:'ザクⅡS',r:'サ',d:[['グフ']]},  
+{n:'ザクⅡ改',r:'サ',d:[['ザクⅡS']]},  
+{n:'ザクⅡFS（ガルマ・ザビ専用）',r:'サ',d:[['グフ','ザクⅡ']]},  
+{n:'ザクⅡJ（3連装ミサイルポッド装備）',r:'サ',ps:{LEG:[['ザクⅡ（レッグ）','ザクⅡS（レッグ）']]}},  
+{n:'ザクマインレイヤー',r:'サ',d:[['ザクⅡ','ザクⅡS']]},  
+{n:'ジム',r:'サ',shop:1},  
+{n:'ジムⅡ',r:'サ',d:[['ガンダム','ジム']]},  
+{n:'ジムⅢ',r:'サ',d:[['ジム・カスタム','ジムⅡ']]},  
+{n:'ジム・カスタム',r:'サ',d:[['ジムⅡ']]},  
+{n:'ジム・コマンド',r:'サ',d:[['ガンダム']]},  
+{n:'シャイニングガンダム',r:'サ',ps:{BACK:[['ジンクス（バックパック）']],BODY:[['ノーベルガンダム','ライジングガンダム']],ARM:[['ノーベルガンダム','ライジングガンダム']],LEG:[['ノーベルガンダム','ライジングガンダム']],HEAD:[['ノーベルガンダム','ライジングガンダム']]}},  
+{n:'ジャスティスガンダム',r:'サ',ps:{BODY:[['ストライクルージュ']],ARM:[['ストライクルージュ']],LEG:[['ストライクルージュ']],HEAD:[['ストライクルージュ']],BACK:[['ストライクルージュ+I.W.S.P.（バックパック）']]}},  
+{n:'ジュアッグ（ユニコーンVer.）',r:'サ',d:[['ベアッガイ','ベアッガイⅢ']]},  
+{n:'ジンクス',r:'サ',d:[['ガンダムエクシア','ガンダムG-セルフ']]},  
+{n:'ジンクスⅢ',r:'サ',ps:{LEG:[['GNアーチャー（レッグ）','ジンクス（レッグ）']],BACK:[['GNアーチャー（バックパック）','ジンクス（バックパック）']]}},  
+{n:'真武者頑駄無（戦国の陣）',r:'サ',d:[['ガンダム','ジム']]},  
+{n:'ズゴック',r:'サ',shop:1},  
+{n:'スサノオ',r:'サ',d:[['GNアーチャー','ジンクス']]},  
+{n:'スタークジェガン',r:'サ',d:[['ジム・カスタム','ジェガン']]},  
+{n:'スターゲイザー',r:'サ',d:[['ストライクガンダム','ストライクルージュ']]},  
+{n:'ストライクガンダム',r:'サ',d:[['ガンダムF91','V2ガンダム']]},  
+{n:'ストライクノワール',r:'サ',d:[['ガンダムエクシア','ストライクガンダム']]},  
+{n:'ストライクフリーダムガンダム',r:'サ',d:[['ジャスティスガンダム','フリーダムガンダム']]},  
+{n:'ストライクルージュ',r:'サ',d:[['ストライクガンダム','ガンダムエクシア']]},  
+{n:'ストライクルージュ（I.W.S.P.）',r:'サ',ps:{BACK:[['エールストライクガンダム（バックパック）','ガンダムエクシア（バックパック）']]}},  
+{n:'ストライクルージュ（オオトリ）',r:'サ',ps:{BACK:[['エールストライクガンダム（バックパック）']]}},  
+{n:'Sガンダム',r:'サ',d:[['ZZガンダム','ファッツ']]},  
+{n:'Sガンダム（ブースター装着型）',r:'サ',ps:{LEG:[['Sガンダム（レッグ）','ZZガンダム（レッグ）','ファッツ（レッグ）']],BACK:[['Sガンダム（バックパック）','ZZガンダム（バックパック）']]}},  
+{n:'Zガンダム',r:'サ',d:[['ヴィクトリーガンダム']]},  
+{n:'ZプラスA1',r:'サ',d:[['Zガンダム','ライトニングガンダム']]},  
+{n:'ZプラスC1',r:'サ',d:[['ZプラスA1','リック・ディアス']]},  
+{n:'ソードインパルスガンダム',r:'サ',ps:{BACK:[['ジャスティスガンダム（バックパック）','フォースインパルスガンダム（バックパック）']]}},  
+{n:'ソードストライクガンダム',r:'サ',ps:{ARM:[['ストライクガンダム（アーム）']],BACK:[['エールストライクガンダム（バックパック）','ガンダムエクシア（バックパック）']]}},  
+// タ行  
+{n:'ターンX',r:'タ',d:[['∀ガンダム','モビルスモー']]},  
+{n:'∀ガンダム',r:'タ',d:[['ヴィクトリーガンダム','V2ガンダム']]},  
+{n:'ダブルオーガンダム',r:'タ',d:[['ガンダムキュリオス']]},  
+{n:'ダブルオーガンダムセブンソード/G',r:'タ',ps:{BACK:[['ケルディムガンダム（バックパック）','ダブルオーガンダム（バックパック）']]}},  
+{n:'ダブルオークアンタ',r:'タ',ps:{BACK:[['ダブルオーライザー（バックパック）']],BODY:[['ガンダムエクシア','ダブルオーガンダム']],ARM:[['ガンダムエクシア','ダブルオーガンダム']],LEG:[['ガンダムエクシア','ダブルオーガンダム']],HEAD:[['ガンダムエクシア','ダブルオーガンダム']]}},  
+{n:'ダブルオーライザー',r:'タ',ps:{BACK:[['ケルディムガンダム（バックパック）','ダブルオーガンダム（バックパック）']]}},  
+{n:'ZZガンダム',r:'タ',d:[['Zガンダム','百式']]},  
+{n:'ヅダ',r:'タ',d:[['ザクⅡ','ザクⅡS']]},  
+{n:'ヅダ（隊長機）',r:'タ',ps:{HEAD:[['ヅダ（ヘッド）']]}},  
+{n:'デスティニーガンダム',r:'タ',ps:{BACK:[['フォースインパルスガンダム（バックパック）']],BODY:[['インパルスガンダム','ジャスティスガンダム']],ARM:[['インパルスガンダム','ジャスティスガンダム']],LEG:[['インパルスガンダム','ジャスティスガンダム']],HEAD:[['インパルスガンダム','ジャスティスガンダム']]}},  
+{n:'デナン・ゾン',r:'タ',d:[['グフ','ドム']]},  
+{n:'デュエルガンダム',r:'タ',d:[['ガンダムF91','V2ガンダム']]},  
+{n:'デュエルガンダムアサルトシュラウド',r:'タ',ps:{BACK:[['エールストライクガンダム（バックパック）']],BODY:[['ストライクガンダム','デュエルガンダム']],ARM:[['ストライクガンダム','デュエルガンダム']],LEG:[['ストライクガンダム','デュエルガンダム']],HEAD:[['ストライクガンダム','デュエルガンダム']]}},  
+{n:'ドーベン・ウルフ',r:'タ',ps:{HEAD:[['ガンダムTR-1[アドバンスド・ヘイズル]（ヘッド）']],BODY:[['ガンダムTR-1[アドバンスド・ヘイズル]','ペイルライダー']],ARM:[['ガンダムTR-1[アドバンスド・ヘイズル]','ペイルライダー']],LEG:[['ガンダムTR-1[アドバンスド・ヘイズル]','ペイルライダー']],BACK:[['ガンダムTR-1[アドバンスド・ヘイズル]','ペイルライダー']]}},  
+{n:'トールギス',r:'タ',d:[['グフカスタム','ケンプファー']]},  
+{n:'トールギスⅡ',r:'タ',ps:{HEAD:[['トールギス（ヘッド）','トールギスⅢ（ヘッド）']]}},  
+{n:'トールギスⅢ',r:'タ',d:[['ヅダ','トールギス']]},  
+{n:'ドム',r:'タ',d:[['グフ','ヅダ']]},  
+{n:'ドム・トローペン',r:'タ',d:[['グフ','ドム']]},  
+{n:'ドム・トローペン（サンドブラウン）',r:'タ',d:[['ザクⅡ','ドム']]},  
+{n:'ドライセン（ユニコーンVer.）',r:'タ',d:[['グフ','ドム']]},  
+{n:'ドラゴンガンダム',r:'タ',ps:{BACK:[['ジンクス（バックパック）']],BODY:[['ノーベルガンダム','ライジングガンダム']],ARM:[['ノーベルガンダム','ライジングガンダム']],LEG:[['ノーベルガンダム','ライジングガンダム']],HEAD:[['ノーベルガンダム','ライジングガンダム']]}},  
+// ナ行  
+{n:'νガンダム',r:'ナ',d:[['ZZガンダム']]},  
+{n:'ノーベルガンダム',r:'ナ',d:[['シェンロンガンダム','ライジングガンダム']]},  
+// ハ行  
+{n:'パーフェクトガンダム',r:'ハ',d:[['ガンダム','ジム']]},  
+{n:'パーフェクトジオング',r:'ハ',ps:{ARM:[['ゲルググ（指揮官用）（アーム）','ジオング（アーム）']],LEG:[['ゲルググ（指揮官用）（レッグ）','ジオング（レッグ）']]}},  
+{n:'パーフェクトストライクガンダム',r:'ハ',ps:{ARM:[['ソードストライクガンダム（アーム）','ブリッツガンダム（アーム）']],BACK:[['ソードストライクガンダム（バックパック）','ブリッツガンダム（バックパック）']]}},  
+{n:'バイアラン・カスタム',r:'ハ',d:[['ギャプランTR-5[フライルー]','Zガンダム']]},  
+{n:'ハイゴッグ',r:'ハ',d:[['ザクⅡS','ズゴック']]},  
+{n:'Hi-νガンダム',r:'ハ',d:[['ZZガンダム','νガンダム']]},  
+{n:'バスターガンダム',r:'ハ',dlc:1},  
+{n:'パラス・アテネ',r:'ハ',d:[['アストレイレッドフレーム','ジンクス']]},  
+{n:'パワードジムカーディガン',r:'ハ',d:[['ジム・カスタム','ジムⅡ']]},  
+{n:'パワードジムカーディガン（ガトリング）',r:'ハ',ps:{BACK:[['ジムⅢ（バックパック）','パワードジムカーディガン（バックパック）']]}},  
+{n:'バンシィ',r:'ハ',d:[['ガンダムMk-Ⅱエゥーゴ仕様','ユニコーンガンダム']]},  
+{n:'バンシィ（アームド・アーマー装備）',r:'ハ',ps:{ARM:[['ガンダムMk-Ⅱティターンズ仕様（アーム）','バンシィ（アーム）']]}},  
+{n:'バンシィ・ノルン',r:'ハ',ps:{BACK:[['バンシィ（バックパック）','ユニコーンガンダム（バックパック）']]}},  
+{n:'ビギニング30ガンダム',r:'ハ',dlc:1},  
+{n:'百式',r:'ハ',d:[['Zガンダム','ライトニングガンダム']]},  
+{n:'ビルドストライクガンダム（フルパッケージ）',r:'ハ',ps:{BACK:[['エールストライクガンダム（バックパック）','ガンダムエクシア（バックパック）']],BODY:[['ストライクガンダム','ガンダムエクシア']],ARM:[['ストライクガンダム','ガンダムエクシア']],LEG:[['ストライクガンダム','ガンダムエクシア']],HEAD:[['ストライクガンダム','ガンダムエクシア']]}},  
+{n:'ビルドバーニングガンダム',r:'ハ',d:[['ザクⅡ','ドム']]},  
+{n:'V2アサルトガンダム',r:'ハ',ps:{ARM:[['ガンダムF91（アーム）','V2ガンダム（アーム）']],LEG:[['ガンダムF91（レッグ）','V2ガンダム（レッグ）']]}},  
+{n:'V2アサルトバスターガンダム',r:'ハ',ps:{LEG:[['V2アサルトガンダム（レッグ）','V2バスターガンダム（レッグ）']]}},  
+{n:'V2ガンダム',r:'ハ',d:[['ヴィクトリーガンダム','ガンダムMk-Ⅱエゥーゴ仕様']]},  
+{n:'V2バスターガンダム',r:'ハ',ps:{LEG:[['ヴィクトリーガンダム（レッグ）','V2ガンダム（レッグ）']],BACK:[['ヴィクトリーガンダム（バックパック）','V2ガンダム（バックパック）']]}},  
+{n:'ファッツ',r:'ハ',d:[['ZプラスA1','ZZガンダム']]},  
+{n:'フォースインパルスガンダム',r:'ハ',ps:{BACK:[['ガンダムエクシア（バックパック）','エールストライクガンダム（バックパック）']]}},  
+{n:'ブラストインパルスガンダム',r:'ハ',ps:{BACK:[['ジャスティスガンダム（バックパック）','フォースインパルスガンダム（バックパック）']]}},  
+{n:'フリーダムガンダム',r:'ハ',ps:{BACK:[['エールストライクガンダム（バックパック）','ガンダムエクシア（バックパック）']],BODY:[['ストライクガンダム','ガンダムエクシア']],ARM:[['ストライクガンダム','ガンダムエクシア']],LEG:[['ストライクガンダム','ガンダムエクシア']],HEAD:[['ストライクガンダム','ガンダムエクシア']]}},  
+{n:'ブリッツガンダム',r:'ハ',d:[['ヴィクトリーガンダム','V2ガンダム']]},  
+{n:'フルアーマー・ガンダム',r:'ハ',d:[['サイコザク','パーフェクトガンダム']]},  
+{n:'フルアーマー・ユニコーンガンダム',r:'ハ',dlc:1},  
+{n:'ブルーデスティニー1号機',r:'ハ',d:[['ジム','ジム・コマンド','陸戦型ガンダム']]},  
+{n:'ブルーデスティニー2号機',r:'ハ',d:[['ジム・カスタム','陸戦型ガンダム']]},  
+{n:'ブルーデスティニー3号機',r:'ハ',ps:{BACK:[['ジムⅡ（バックパック）']],BODY:[['ジム・カスタム','ブルーデスティニー1号機']],ARM:[['ジム・カスタム','ブルーデスティニー1号機']],LEG:[['ジム・カスタム','ブルーデスティニー1号機']],HEAD:[['ジム・カスタム','ブルーデスティニー1号機']]}},  
+{n:'プロヴィデンスガンダム',r:'ハ',ps:{HEAD:[['デュエルガンダム（ヘッド）']],BODY:[['デュエルガンダム（ボディ）','ブリッツガンダム']],ARM:[['デュエルガンダム','ブリッツガンダム']],LEG:[['デュエルガンダム','ブリッツガンダム']],BACK:[['デュエルガンダム（バックパック）','ブリッツガンダム']]}},  
+{n:'ベアッガイ',r:'ハ',d:[['アッガイ','ジュアッグ（ユニコーンVer.）']]},  
+{n:'ベアッガイⅢ',r:'ハ',d:[['ジュアッグ（ユニコーンVer.）','ベアッガイ']]},  
+{n:'ペイルライダー',r:'ハ',ps:{BACK:[['ジムⅡ（バックパック）']],BODY:[['ジム・コマンド','ブルーデスティニー1号機']],ARM:[['ジム・コマンド','ブルーデスティニー1号機']],LEG:[['ジム・コマンド','ブルーデスティニー1号機']],HEAD:[['ジム・コマンド','ブルーデスティニー1号機']]}},  
+{n:'風雲再起',r:'ハ',ps:{HEAD:[['マスターガンダム（ヘッド）','ビルドバーニングガンダム（ヘッド）']],LEG:[['マスターガンダム（レッグ）','ビルドバーニングガンダム（レッグ）']]}},  
+// マ行  
+{n:'マスターガンダム',r:'マ',d:[['シャイニングガンダム','ドラゴンガンダム']]},  
+{n:'武者ガンダムMk-Ⅱ',r:'マ',d:[['ガンダムNT-1','ガンダムMk-Ⅱエゥーゴ仕様']]},  
+{n:'モビルカプル',r:'マ',d:[['ザクⅡS','ズゴック']]},  
+{n:'モビルスモー',r:'マ',ps:{HEAD:[['ザクⅡ（ヘッド）','デナン・ゾン（ヘッド）']],BODY:[['ズゴック','モビルカプル']],ARM:[['ズゴック','モビルカプル']],LEG:[['ズゴック','モビルカプル']],BACK:[['デナン・ゾン（バックパック）','モビルカプル']]}},  
+{n:'モビルワーカー',r:'マ',dlc:1},  
+// ヤ行  
+{n:'ヤクト・ドーガ（ギュネイ専用機）',r:'ヤ',d:[['ギラ・ドーガ','ギラ・ドーガ（レズン専用機）']]},  
+{n:'ヤクト・ドーガ（クェス専用機）',r:'ヤ',d:[['ドーベン・ウルフ','ヤクト・ドーガ（ギュネイ専用機）']]},  
+{n:'ユニコーンガンダム',r:'ヤ',d:[['ガンダム試作1号機ゼフィランサス','ガンダムMk-Ⅱエゥーゴ仕様']]},  
+// ラ行  
+{n:'ライジングガンダム',r:'ラ',d:[['ガンダムNT-1','G-3ガンダム']]},  
+{n:'ライトニングガンダム',r:'ラ',d:[['Zガンダム','ZプラスC1']]},  
+{n:'ランチャーストライクガンダム',r:'ラ',ps:{ARM:[['ストライクガンダム（アーム）','ストライクルージュ（アーム）']],BACK:[['エールストライクガンダム（バックパック）','ストライクルージュ+I.W.S.P.（バックパック）']]}},  
+{n:'陸戦型ガンダム',r:'ラ',d:[['ガンダム','G-3ガンダム']]},  
+{n:'リック・ディアス',r:'ラ',d:[['ガンダムNT-1','G-3ガンダム']]},  
+{n:'リバウ',r:'ラ',dlc:1},  
+{n:'レジェンドガンダム',r:'ラ',d:[['ジャスティスガンダム','プロヴィデンスガンダム']]},  
+{n:'ローゼン・ズール',r:'ラ',d:[['ジ・O','パラス・アテネ']]}  
+];  
+  
+// =============================================  
+// 武器・シールドデータ  
+// cat: カテゴリ, owner: 機体名, d: [派生元配列] or null(ショップ/ドロップ), dlc:1  
+// =============================================  
+var WD = {  
+melee: [  
+// サーベル  
+{n:'ヒート・サーベル（グフ）',cat:'サーベル',owner:'グフ',shop:1},  
+{n:'ビーム・サーベル',cat:'サーベル',owner:'ガンダム',shop:1},  
+{n:'ヒート・サーベル（グフカスタム）',cat:'サーベル',owner:'グフカスタム',d:[['ヒート・サーベル（グフ）']]},  
+{n:'ヴァジュラビームサーベル',cat:'サーベル',owner:'フォースインパルスガンダム',d:[['ビームサーベル（ウイング）','ラケルタビームサーベル']]},  
+{n:'ガーベラ・ストレート',cat:'サーベル',owner:'アストレイレッドフレーム',d:[['ヒート・サーベル（グフ）']]},  
+{n:'GNソード',cat:'サーベル',owner:'ガンダムエクシア',d:[['ヒート・サーベル（グフカスタム）','ヒート・ナイフ付ビーム・サーベル']]},  
+{n:'GNソードⅢ',cat:'サーベル',owner:'ダブルオーガンダム',d:[['ガーベラ・ストレート/タイガーピアス','GNソードⅡ']]},  
+{n:'GNソードⅤ',cat:'サーベル',owner:'ダブルオークアンタ',d:[['GNソードⅢ','GNビームサーベル（GN-XⅢ）']]},  
+{n:'GNビームサーベル（GN-X）',cat:'サーベル',owner:'GN-X',d:[['GNソード']]},  
+{n:'GNビームサーベル（GN-XⅢ）',cat:'サーベル',owner:'GN-XⅢ',d:[['GNソード','GNビームサーベル（GN-X）']]},  
+{n:'シュバリエサーベル',cat:'サーベル',owner:'ガンダムローズ',dlc:1},  
+{n:'専用ビーム・サーベル',cat:'サーベル',owner:'ギャン',d:[['ヒート・サーベル（グフ）']]},  
+{n:'太刀（ガンダムバルバトス）',cat:'サーベル',owner:'ガンダムバルバトス',d:[['GNソードⅢ','GNビームサーベル（GN-XⅢ）']]},  
+{n:'日輪丸',cat:'サーベル',owner:'真武者頑駄無',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ヒート・ナイフ付ビーム・サーベル',cat:'サーベル',owner:'ヤクト・ドーガ（ギュネイ専用機）',d:[['ビーム・サーベル（百式）']]},  
+{n:'ビーム・サーベル（F91）',cat:'サーベル',owner:'ガンダムF91',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ビーム・サーベル（V）',cat:'サーベル',owner:'ヴィクトリーガンダム',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ビームサーベル（ウイング）',cat:'サーベル',owner:'ウイングガンダム',d:[['ビーム・サーベル（F91）','ビーム・サーベル（ν）']]},  
+{n:'ビームサーベル（エールストライク）',cat:'サーベル',owner:'エールストライクガンダム',d:[['ビーム・サーベル（V）','ビーム・サーベル（Z）']]},  
+{n:'ビーム・サーベル（サザビー）',cat:'サーベル',owner:'サザビー',d:[['ヒート・ナイフ付ビーム・サーベル','ビーム・サーベル（百式）']]},  
+{n:'ビーム・サーベル（Sガンダム）',cat:'サーベル',owner:'Sガンダム',d:[['ビーム・サーベル（Z）']]},  
+{n:'ビーム・サーベル（Z）',cat:'サーベル',owner:'Zガンダム',d:[['ビーム・サーベル（F91）','ビーム・サーベル（Mk-Ⅱ）']]},  
+{n:'ビーム・サーベル（ν）',cat:'サーベル',owner:'νガンダム',d:[['ビーム・サーベル（Z）']]},  
+{n:'ビーム・サーベル（Hi-ν）',cat:'サーベル',owner:'Hi-νガンダム',d:[['ビーム・サーベル（サザビー）','ビーム・サーベル（ν）']]},  
+{n:'ビーム・サーベル（ビギニング30）',cat:'サーベル',owner:'ビギニング30ガンダム',dlc:1},  
+{n:'ビーム・サーベル（百式）',cat:'サーベル',owner:'百式',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ビーム・サーベル（Mk-Ⅱ）',cat:'サーベル',owner:'ガンダムMk-Ⅱ',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ビーム・サーベル（ユニコーン）',cat:'サーベル',owner:'ユニコーンガンダム',d:[['ビーム・サーベル（F91）','ビーム・サーベル（Mk-Ⅱ）']]},  
+{n:'ラケルタビームサーベル',cat:'サーベル',owner:'フリーダムガンダム',d:[['ビーム・サーベル（V）','ビームサーベル（エールストライク）']]},  
+{n:'ロング・ヒートブレード',cat:'サーベル',owner:'ガンダムTR-6[ウーンドウォート]',dlc:1},  
+// ダブルサーベル  
+{n:'アーマーシュナイダー（ストライク）',cat:'ダブルサーベル',owner:'ストライクガンダム',d:[['ビーム・サーベル（V）','ビームサーベル（エールストライク）']]},  
+{n:'アーマーシュナイダー（ブルーフレーム）',cat:'ダブルサーベル',owner:'アストレイブルーフレーム',d:[['アーマーシュナイダー（ストライク）','ガーベラ・ストレート/タイガーピアス']]},  
+{n:'ガーベラ・ストレート/タイガーピアス',cat:'ダブルサーベル',owner:'アストレイレッドフレーム改',d:[['ヒート・サーベル（グフカスタム）','ガーベラ・ストレート']]},  
+{n:'虎徹丸',cat:'ダブルサーベル',owner:'武者ガンダムMk-Ⅱ',d:[['日輪丸']]},  
+{n:'GNソードⅡ',cat:'ダブルサーベル',owner:'ダブルオーガンダム',d:[['GNソード']]},  
+{n:'GNソードⅡショート/GNソードⅡロング',cat:'ダブルサーベル',owner:'ダブルオーガンダムセブンソード/G',d:[['ガーベラ・ストレート/タイガーピアス','GNソードⅡ']]},  
+{n:'GNビームサーベル（エクシア）',cat:'ダブルサーベル',owner:'ガンダムエクシア',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'GNロングブレイド/GNショートブレイド',cat:'ダブルサーベル',owner:'ガンダムエクシア',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'試製9.1m対艦刀',cat:'ダブルサーベル',owner:'ストライクルージュ+I.W.S.P.',d:[['アーマーシュナイダー（ストライク）','ガーベラ・ストレート/タイガーピアス']]},  
+{n:'シュペールラケルタビームサーベル',cat:'ダブルサーベル',owner:'ストライクフリーダムガンダム',d:[['ビームサーベル（ウイング）','ラケルタビームサーベル']]},  
+{n:'シラヌイ/ウンリュウ',cat:'ダブルサーベル',owner:'スサノオ',d:[['ガーベラ・ストレート/タイガーピアス','GNソードⅡ']]},  
+{n:'ツインメイス',cat:'ダブルサーベル',owner:'ガンダムバルバトスルプス',dlc:1},  
+{n:'ヒートショーテル（サンドロック）',cat:'ダブルサーベル',owner:'ガンダムサンドロック（EW版）',d:[['ガーベラ・ストレート/タイガーピアス','試製9.1m対艦刀']]},  
+{n:'ヒートショーテル（サンドロック改）',cat:'ダブルサーベル',owner:'ガンダムサンドロック改（EW版）',d:[['ヒート・サーベル（グフカスタム）','ヒートショーテル（サンドロック）']]},  
+{n:'ビーム・サーベル（G-セルフ）',cat:'ダブルサーベル',owner:'ガンダムG-セルフ',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ビーム・サーベル（∀）',cat:'ダブルサーベル',owner:'∀ガンダム',d:[['ビーム・サーベル（V）','ビーム・サーベル（Z）']]},  
+{n:'フォールディングレイザー対装甲ナイフ',cat:'ダブルサーベル',owner:'インパルスガンダム',d:[['アーマーシュナイダー（ストライク）','ガーベラ・ストレート/タイガーピアス']]},  
+{n:'フラガラッハ3ビームブレイド',cat:'ダブルサーベル',owner:'ストライクノワール',d:[['アーマーシュナイダー（ストライク）','シュペールラケルタビームサーベル']]},  
+// 大剣  
+{n:'アロンダイト',cat:'大剣',owner:'デスティニーガンダム',d:[['ヴァジュラビームサーベル','ラケルタビームサーベル']]},  
+{n:'大型対艦刀',cat:'大剣',owner:'ストライクルージュ（オオトリ）',d:[['GNビームサーベル（GN-X）','シュベルトゲベール']]},  
+{n:'大型ビームソード',cat:'大剣',owner:'ガンダムX',d:[['ハイパー・ビーム・サーベル','ラケルタビームサーベル']]},  
+{n:'カレトヴルッフSモード',cat:'大剣',owner:'アストレイレッドドラゴン',d:[['ガーベラ・ストレート','ヒート・サーベル（グフカスタム）']]},  
+{n:'グランドスラム',cat:'大剣',owner:'エールストライクガンダム',d:[['GNビームサーベル（GN-X）','シュベルトゲベール']]},  
+{n:'GNバスターソード',cat:'大剣',owner:'アルケーガンダム',dlc:1},  
+{n:'シュベルトゲベール',cat:'大剣',owner:'ソードストライクガンダム',d:[['ビーム・サーベル（V）','ビームサーベル（エールストライク）']]},  
+{n:'デモリッションナイフ',cat:'大剣',owner:'ガンダムアスタロト',dlc:1},  
+{n:'ハイパー・ビーム・サーベル',cat:'大剣',owner:'ZZガンダム',d:[['ビーム・サーベル（G-セルフ）']]},  
+{n:'ハイパービームソード',cat:'大剣',owner:'ガンダムダブルエックス',d:[['ヴァジュラビームサーベル','大型ビームソード']]},  
+{n:'ビームサーベル（ヴァサーゴ）',cat:'大剣',owner:'ガンダムヴァサーゴ',d:[['ヴァジュラビームサーベル','大型ビームソード']]},  
+{n:'ビームソード',cat:'大剣',owner:'ガンダムエピオン',d:[['ビームサーベル（ウイング）']]},  
+// ツインブレード  
+{n:'エクスカリバー',cat:'ツインブレード',owner:'ソードインパルスガンダム',d:[['フォールディングレイザー対装甲ナイフ','フラガラッハ3ビームブレイド']]},  
+{n:'カレトヴルッフアンビデクストラスハルバードモード',cat:'ツインブレード',owner:'アストレイレッドドラゴン',d:[['カレトヴルッフSモード','GNビームサーベル（GN-XⅢ）']]},  
+{n:'試製双刀型ビームサーベル',cat:'ツインブレード',owner:'アカツキ',d:[['アーマーシュナイダー（ストライク）','シュペールラケルタビームサーベル']]},  
+{n:'閃光丸',cat:'ツインブレード',owner:'武者ガンダムMk-Ⅱ',d:[['ビーム・ナギナタ（ジョニー・ライデン専用ゲルググ）']]},  
+{n:'ツインビームソード',cat:'ツインブレード',owner:'ガンダムダブルエックス',d:[['GNソードⅢ','ハイパービームソード']]},  
+{n:'ツインビームトライデント',cat:'ツインブレード',owner:'アルトロンガンダム（EW版）',d:[['ビームトライデント']]},  
+{n:'デファイアント改ビームジャベリン',cat:'ツインブレード',owner:'レジェンドガンダム',d:[['デファイアントビームジャベリン','ハイパー・ビーム・ジャベリン']]},  
+{n:'電光丸',cat:'ツインブレード',owner:'真武者頑駄無',d:[['ビーム・ナギナタ','ビーム・ナギナタ（シャア専用ゲルググ）']]},  
+{n:'バクゥヘッド',cat:'ツインブレード',owner:'アストレイレッドフレーム（フライトユニット装備）',d:[['ビーム・ナギナタ（ジョニー・ライデン専用ゲルググ）']]},  
+{n:'ビーム・ナギナタ',cat:'ツインブレード',owner:'シナンジュ',d:[['ビーム・アックス','ビーム・トマホーク（サザビー）']]},  
+{n:'ビーム・ナギナタ（シャア専用ゲルググ）',cat:'ツインブレード',owner:'シャア専用ゲルググ',d:[['ヒート・サーベル（グフカスタム）','ビーム・サーベル']]},  
+{n:'ビーム・ナギナタ（ジョニー・ライデン専用ゲルググ）',cat:'ツインブレード',owner:'ジョニー・ライデン専用高機動型ゲルググ',d:[['ビーム・ナギナタ','ビーム・ナギナタ（シャア専用ゲルググ）']]},  
+// アックス  
+{n:'ヒート・ホーク',cat:'アックス',owner:'ザクⅡ',shop:1},  
+{n:'大型ヒート・ホーク',cat:'アックス',owner:'ガルマ・ザビ専用ザクⅡFS型',d:[['ヒート・ホーク','ビーム・トマホーク（ドライセン）']]},  
+{n:'グシオンハンマー',cat:'アックス',owner:'ガンダムグシオン',dlc:1},  
+{n:'ソードメイス',cat:'アックス',owner:'ガンダムバルバトスルプス',dlc:1},  
+{n:'デッドエンドG',cat:'アックス',owner:'スーパーカスタムザクF2000',d:[['大型ヒート・ホーク','ヒートファン']]},  
+{n:'ハルバード',cat:'アックス',owner:'ガンダムグシオンリベイク',dlc:1},  
+{n:'ヒートファン',cat:'アックス',owner:'モビルスモー（ゴールドタイプ）',d:[['ヒート・ホーク','ビーム・トマホーク（ドライセン）']]},  
+{n:'ビーム・アックス',cat:'アックス',owner:'シナンジュ',d:[['ビーム・サーベル（ユニコーン）']]},  
+{n:'ビームシザース',cat:'アックス',owner:'ガンダムデスサイズヘル（EW版）',d:[['デッドエンドG']]},  
+{n:'ビーム・ソード・アックス',cat:'アックス',owner:'ギラ・ドーガ',d:[['大型ヒート・ホーク','ヒートファン']]},  
+{n:'ビーム・トマホーク（サザビー）',cat:'アックス',owner:'サザビー',d:[['デッドエンドG','ビーム・ソード・アックス']]},  
+{n:'ビーム・トマホーク（ドライセン）',cat:'アックス',owner:'ドライセン',d:[['デッドエンドG','ビーム・ソード・アックス']]},  
+// ランス  
+{n:'グングニール',cat:'ランス',owner:'ガンダムキマリス',dlc:1},  
+{n:'散光丸',cat:'ランス',owner:'真武者頑駄無',d:[['ビーム・ジャベリン']]},  
+{n:'GNランス',cat:'ランス',owner:'ジンクスⅢ',d:[['ヒート・ランス']]},  
+{n:'ショット・ランサー',cat:'ランス',owner:'デナン・ゾン',d:[['ビーム・ジャベリン']]},  
+{n:'デファイアントビームジャベリン',cat:'ランス',owner:'ブラストインパルスガンダム',d:[['ヴァジュラビームサーベル','ラケルタビームサーベル']]},  
+{n:'ビーム・ジャベリン',cat:'ランス',owner:'ガンダムMk-Ⅱ',shop:1},  
+{n:'ハイパー・ビーム・ジャベリン',cat:'ランス',owner:'ZZガンダム',d:[['デファイアントビームジャベリン','ビーム・ジャベリン']]},  
+{n:'ヒート・ランス',cat:'ランス',owner:'ゲルググ（指揮官用）',shop:1}  
+],  
+shoot: [  
+// ライフル  
+{n:'ビーム・スプレーガン',cat:'ライフル',owner:'ジム',shop:1},  
+{n:'ビーム・ライフル（ガンダム）',cat:'ライフル',owner:'ガンダム',shop:1},  
+{n:'マゼラトップ砲',cat:'ライフル',owner:'ザクⅡ',shop:1},  
+{n:'57mm高エネルギービームライフル（ストライク）',cat:'ライフル',owner:'ストライクガンダム',d:[['ビーム・ライフル（V）','ビーム・ライフル（V2）']]},  
+{n:'57mm高エネルギービームライフル（デュエル）',cat:'ライフル',owner:'デュエルガンダム',d:[['ビーム・ライフル（V）','ビーム・ライフル（V2）']]},  
+{n:'60mm高エネルギービームライフル',cat:'ライフル',owner:'イージスガンダム',dlc:1},  
+{n:'MA-BAR72 高エネルギービームライフル',cat:'ライフル',owner:'インパルスガンダム',d:[['57mm高エネルギービームライフル（ストライク）','ビーム・ライフル（F91）']]},  
+{n:'MA-BAR73/S 高エネルギービームライフル',cat:'ライフル',owner:'デスティニーガンダム',d:[['MA-BAR72 高エネルギービームライフル','ルプスビームライフル']]},  
+{n:'MA-BAR78F 高エネルギービームライフル',cat:'ライフル',owner:'レジェンドガンダム',d:[['ビーム・ショットライフル','ユーディキウムビームライフル']]},  
+{n:'MA-M1911 高エネルギービームライフル',cat:'ライフル',owner:'インフィニットジャスティスガンダム',d:[['57mm高エネルギービームライフル（デュエル）']]},  
+{n:'大型ビーム・ライフル',cat:'ライフル',owner:'ジ・O',d:[['ビーム・ライフル（シャア専用ゲルググ）','マゼラトップ砲']]},  
+{n:'強化ビームライフル',cat:'ライフル',owner:'ビルドストライクガンダムフルパッケージ',d:[['57mm高エネルギービームライフル（ストライク）','ビームライフル（ビルドストライクガンダム）']]},  
+{n:'ザンバスター',cat:'ライフル',owner:'クロスボーン・ガンダムX1',d:[['シールドバスターライフル','ビーム・ライフル（F91）']]},  
+{n:'GNビームライフル（GN-X）',cat:'ライフル',owner:'GN-X',d:[['GNソード']]},  
+{n:'GNビームライフル（GN-XⅢ）',cat:'ライフル',owner:'GN-XⅢ',d:[['GNビームライフル（GN-X）','シールドバスターライフル']]},  
+{n:'シールドバスターライフル',cat:'ライフル',owner:'ガンダムX',d:[['ビーム・ライフル（V）','ビーム・ライフル（V2）']]},  
+{n:'スタングルライフル',cat:'ライフル',owner:'ガンダムAGE-FX',dlc:1},  
+{n:'ストライクシューター',cat:'ライフル',owner:'ガンダムヴァサーゴ',d:[['シールドバスターライフル','ビーム・ライフル（V2）']]},  
+{n:'DX専用バスターライフル',cat:'ライフル',owner:'ガンダムダブルエックス',d:[['シールドバスターライフル','ビーム・ライフル（V2）']]},  
+{n:'ダブル・ビーム・ライフル',cat:'ライフル',owner:'ZZガンダム',d:[['ビーム・ライフル（Z）','マゼラトップ砲']]},  
+{n:'ツインソードライフル',cat:'ライフル',owner:'アストレイグリーンフレーム',d:[['ツイン・ビーム・スピア','ヒート・ランス']]},  
+{n:'二連ビーム・ライフル',cat:'ライフル',owner:'フルアーマー・ガンダム',d:[['ダブル・ビーム・ライフル','ビーム・ライフル（百式）']]},  
+{n:'バスターライフル',cat:'ライフル',owner:'ウイングガンダム',d:[['ドーバーガン']]},  
+{n:'ハンドビームガン',cat:'ライフル',owner:'モビルスモー（ゴールドタイプ）',d:[['ビーム・スプレーガン','ビーム・ライフル（ガンダム）']]},  
+{n:'ピーコック・スマッシャー',cat:'ライフル',owner:'クロスボーン・ガンダムX1改・改',d:[['ザンバスター']]},  
+{n:'ビーム・ガン',cat:'ライフル',owner:'ジム・コマンド宇宙仕様',d:[['ビーム・スプレーガン','ビーム・ライフル（ガンダム）']]},  
+{n:'ビーム・ショットガン',cat:'ライフル',owner:'カバカーリー',dlc:1},  
+{n:'ビーム・ショットライフル',cat:'ライフル',owner:'サザビー',d:[['大型ビーム・ライフル','対艦ライフル']]},  
+{n:'ビーム・マグナム（バンシィ）',cat:'ライフル',owner:'バンシィ',d:[['ビーム・マグナム（ユニコーン）','ビーム・ライフル（ZプラスA1）']]},  
+{n:'ビーム・マグナム（ユニコーン）',cat:'ライフル',owner:'ユニコーンガンダム',d:[['ビーム・ライフル（GP01）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ビーム・ライフル（F91）',cat:'ライフル',owner:'ガンダムF91',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ビーム・ライフル（V）',cat:'ライフル',owner:'ヴィクトリーガンダム',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ビーム・ライフル（NT-1）',cat:'ライフル',owner:'ガンダムNT-1',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ビーム・ライフル（G-セルフ）',cat:'ライフル',owner:'ガンダムG-セルフ',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ビーム・ライフル（GP01）',cat:'ライフル',owner:'ガンダム試作1号機ゼフィランサス',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ビーム・ライフル（シャア専用ゲルググ）',cat:'ライフル',owner:'シャア専用ゲルググ',d:[['ザク・マシンガン（ザクⅡ）','ビーム・スプレーガン']]},  
+{n:'ビーム・ライフル（ZプラスA1）',cat:'ライフル',owner:'ZプラスA1',d:[['ビーム・ライフル（Z）','マゼラトップ砲']]},  
+{n:'ビーム・ライフル（ν）',cat:'ライフル',owner:'νガンダム',d:[['ビーム・ショットライフル','ビーム・ライフル（ドーベン・ウルフ）']]},  
+{n:'ビーム・ライフル（百式）',cat:'ライフル',owner:'百式',d:[['ビーム・ライフル（Z）','マゼラトップ砲']]},  
+{n:'ビームライフル（ビルドストライクガンダム）',cat:'ライフル',owner:'ビルドストライクガンダム',d:[['57mm高エネルギービームライフル（ストライク）','ビーム・ライフル（F91）']]},  
+{n:'ビーム・ライフル（V2）',cat:'ライフル',owner:'V2ガンダム',d:[['ビーム・ライフル（V）','ビーム・ライフル（GP01）']]},  
+{n:'ビーム・ライフル+バズーカ',cat:'ライフル',owner:'シナンジュ',d:[['ビーム・ライフル（ZプラスA1）','ビーム・マグナム（ユニコーン）']]},  
+{n:'ビーム・ライフル（Mk-Ⅱ）',cat:'ライフル',owner:'ガンダムMk-Ⅱエゥーゴ仕様',d:[['ビーム・ライフル（NT-1）','ビーム・ライフル（陸戦型ガンダム）']]},  
+{n:'ビームライフル（ライトニングガンダム）',cat:'ライフル',owner:'ライトニングガンダム',d:[['ビーム・スマートガン（ZプラスC1）','ロング・ブレード・ライフル']]},  
+{n:'ビーム・ライフル（陸戦型ガンダム）',cat:'ライフル',owner:'陸戦型ガンダム',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'ヒャクライ',cat:'ライフル',owner:'アカツキ',d:[['ビームライフル（ビルドストライクガンダム）','ルプスビームライフル']]},  
+{n:'ユーディキウムビームライフル',cat:'ライフル',owner:'プロヴィデンスガンダム',d:[['57mm高エネルギービームライフル（ストライク）','ビーム・ライフル（F91）']]},  
+{n:'ルプスビームライフル',cat:'ライフル',owner:'フリーダムガンダム',d:[['57mm高エネルギービームライフル（ストライク）','ビーム・ライフル（F91）']]},  
+// ダブルライフル  
+{n:'57mm高エネルギービームライフル（ノワール）',cat:'ダブルライフル',owner:'ストライクノワール',d:[['57mm高エネルギービームライフル（デュエル）']]},  
+{n:'MA-M21KF 高エネルギービームライフル',cat:'ダブルライフル',owner:'ストライクフリーダムガンダム',d:[['ビームライフル（ビルドストライクガンダム）','ルプスビームライフル']]},  
+{n:'GNハンドミサイルユニット',cat:'ダブルライフル',owner:'ガンダムキュリオス',d:[['GNソード']]},  
+{n:'GNビームピストル',cat:'ダブルライフル',owner:'ガンダムデュナメス',d:[['GNソード']]},  
+{n:'GNビームピストルⅡ',cat:'ダブルライフル',owner:'ケルディムガンダム',d:[['GNハンドミサイルユニット','GNビームピストル']]},  
+{n:'GNビームライフル（GNアーチャー）',cat:'ダブルライフル',owner:'GNアーチャー',d:[['GNハンドミサイルユニット','GNビームピストル']]},  
+{n:'専用ショットガン',cat:'ダブルライフル',owner:'ケンプファー',d:[['ザク・マシンガン（ザクⅡ改）','ブルパップ・マシンガン']]},  
+{n:'ツインバスターライフル',cat:'ダブルライフル',owner:'ウイングガンダムゼロ（EW版）',d:[['ツインバスターライフル（プロトゼロ）','ハイパー・メガ・ライフル']]},  
+{n:'ビームライフルショーティー',cat:'ダブルライフル',owner:'ストライクノワール',d:[['57mm高エネルギービームライフル（ストライク）','ビーム・ライフル（F91）']]},  
+// ロングライフル  
+{n:'180mmキャノン',cat:'ロングライフル',owner:'陸戦型ガンダム',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（陸戦型ガンダム）']]},  
+{n:'滑空砲',cat:'ロングライフル',owner:'ガンダムバルバトス',d:[['GNスナイパーライフルⅡ','ロング・ブレード・ライフル']]},  
+{n:'GNスナイパーライフル',cat:'ロングライフル',owner:'ガンダムデュナメス',d:[['GNソード']]},  
+{n:'GNスナイパーライフルⅡ',cat:'ロングライフル',owner:'ケルディムガンダム',d:[['GNハンドミサイルユニット','GNビームピストル']]},  
+{n:'GNビームライフル ロングバレル（GN-X）',cat:'ロングライフル',owner:'GN-X',d:[['GNソード']]},  
+{n:'GNビームライフル ロングバレル（GN-XⅢ）',cat:'ロングライフル',owner:'GN-XⅢ',d:[['GNビームライフル（GN-XⅢ）','ビーム・ライフル（スタークジェガン）']]},  
+{n:'シグマシスライフル',cat:'ロングライフル',owner:'ガンダムAGE-3ノーマル',dlc:1},  
+{n:'狙撃用ライフル',cat:'ロングライフル',owner:'ジム・スナイパーⅡ',d:[['ビーム・スプレーガン','ビーム・ライフル（ガンダム）']]},  
+{n:'対艦ライフル',cat:'ロングライフル',owner:'ヅダ',d:[['180mmキャノン','マゼラトップ砲']]},  
+{n:'対物ライフル',cat:'ロングライフル',owner:'ガンダムアスタロト',dlc:1},  
+{n:'種子島',cat:'ロングライフル',owner:'真武者頑駄無',d:[['ビーム・ライフル（ガンダム）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'超高インパルス超射程狙撃ライフル',cat:'ロングライフル',owner:'バスターガンダム',dlc:1},  
+{n:'ツインバスターライフル（プロトゼロ）',cat:'ロングライフル',owner:'ウイングガンダムプロトゼロ（EW版）',d:[['バスターライフル','ビーム・ライフル（V）']]},  
+{n:'ドーバーガン',cat:'ロングライフル',owner:'トールギス（EW版）',d:[['バスターライフル','ビーム・ライフル（V）']]},  
+{n:'ハイパードッズライフル',cat:'ロングライフル',owner:'ガンダムAGE-2ノーマル',d:[['ビーム・ライフル（Z）','マゼラトップ砲']]},  
+{n:'ハイパー・メガ・ライフル',cat:'ロングライフル',owner:'νガンダム',d:[['ダブル・ビーム・ライフル','ビーム・ライフル（百式）']]},  
+{n:'ハイパー・メガ・ランチャー',cat:'ロングライフル',owner:'Zガンダム',d:[['ビーム・ライフル（V）','ビーム・ライフル（Mk-Ⅱ）']]},  
+{n:'バスターライフル（EW版）',cat:'ロングライフル',owner:'ウイングガンダム（EW版）',d:[['バスターライフル','ビーム・ライフル（V）']]},  
+{n:'120mmロングレンジライフル',cat:'ロングライフル',owner:'ガンダムグシオンリベイク',dlc:1},  
+// バズーカ  
+{n:'ザク・マシンガン（ザクⅡ）',cat:'バズーカ',owner:'ザクⅡ',shop:1},  
+{n:'ブルパップ・マシンガン',cat:'バズーカ',owner:'ジム・コマンド',shop:1},  
+{n:'ビーム・ライフル（ドーベン・ウルフ）',cat:'バズーカ',owner:'ドーベン・ウルフ',d:[['ビーム・ライフル（アドバンスド・ヘイズル）','ブルパップ・マシンガン']]}  
+],  
+shield: [  
+{n:'シールド（ガンダム）',cat:'シールド',owner:'ガンダム',shop:1},  
+{n:'シールド（ジム）',cat:'シールド',owner:'ジム',shop:1},  
+{n:'ガトリング・シールド',cat:'シールド',owner:'グフカスタム',shop:1},  
+{n:'曲面型シールド（ジム・コマンド）',cat:'シールド',owner:'ジム・コマンド',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'曲面型シールド（ジム・カスタム）',cat:'シールド',owner:'ジム・カスタム',d:[['曲面型シールド（ジム・コマンド）','シールド（G-3）']]},  
+{n:'シールド（ジム）',cat:'シールド',owner:'ジム',shop:1},  
+{n:'シールド（G-3）',cat:'シールド',owner:'G-3ガンダム',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'シールド（NT-1）',cat:'シールド',owner:'ガンダムNT-1',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'シールド（GP01）',cat:'シールド',owner:'ガンダム試作1号機',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'シールド（Ez8）',cat:'シールド',owner:'ガンダムEz8',d:[['シールド（ガンダム）','シールド（陸戦型ガンダム）']]},  
+{n:'シールド（陸戦型ガンダム）',cat:'シールド',owner:'陸戦型ガンダム',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'対ビームシールド（レッドフレーム）',cat:'シールド',owner:'アストレイレッドフレーム',d:[['シールド（Ez8）','シールド（G-3）']]},  
+{n:'対ビームシールド（ブルーフレーム）',cat:'シールド',owner:'アストレイブルーフレーム',d:[['シールド（ジム）','対ビームシールド（レッドフレーム）']]},  
+{n:'対ビームシールド（グリーンフレーム）',cat:'シールド',owner:'アストレイグリーンフレーム',d:[['シールド（ジム）','対ビームシールド（レッドフレーム）']]},  
+{n:'シールド（G-セルフ）',cat:'シールド',owner:'ガンダムG-セルフ',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'シールド（Mk-Ⅱエゥーゴ仕様）',cat:'シールド',owner:'ガンダムMk-Ⅱエゥーゴ仕様',d:[['シールド（NT-1）','シールド（G-3）']]},  
+{n:'シールド（Mk-Ⅱティターンズ仕様）',cat:'シールド',owner:'ガンダムMk-Ⅱティターンズ仕様',d:[['シールド（G-3）','シールド（Mk-Ⅱエゥーゴ仕様）']]},  
+{n:'シールド（Z）',cat:'シールド',owner:'Zガンダム',d:[['シールド（G-3）','シールド（Mk-Ⅱエゥーゴ仕様）']]},  
+{n:'シールド（ZプラスA1）',cat:'シールド',owner:'ZプラスA1',d:[['シールド（Z）','シールド（Mk-Ⅱエゥーゴ仕様）']]},  
+{n:'シールド（BD1）',cat:'シールド',owner:'ブルーデスティニー1号機',d:[['曲面型シールド（ジム・コマンド）','シールド（G-3）']]},  
+{n:'シールド（BD2）',cat:'シールド',owner:'ブルーデスティニー2号機',d:[['シールド（Ez8）','シールド（G-3）']]},  
+{n:'シールド（BD3）',cat:'シールド',owner:'ブルーデスティニー3号機',d:[['シールド（BD2）','シールド（ペイルライダー）']]},  
+{n:'シールド（ペイルライダー）',cat:'シールド',owner:'ペイルライダー',d:[['曲面型シールド（ジム・カスタム）','シールド（BD1）']]},  
+{n:'シールド・ブースター',cat:'シールド',owner:'ガンダムTR-1[アドバンスド・ヘイズル]',d:[['シールド（BD2）','シールド（ペイルライダー）']]},  
+{n:'強化型シールド・ブースター',cat:'シールド',owner:'ガンダムTR-1[アドバンスド・ヘイズル]',d:[['シールドブースター','シールド（Mk-Ⅱエゥーゴ仕様）']]},  
+{n:'シールド（ジェガン）',cat:'シールド',owner:'ジェガン',d:[['シールド（Ez8）','シールド（G-3）']]},  
+{n:'シールド（ν）',cat:'シールド',owner:'νガンダム',d:[['シールド（Ez8）','シールド（ジェガン）']]},  
+{n:'シールド（Hi-ν）',cat:'シールド',owner:'Hi-νガンダム',d:[['シールド（ν）','シールド・ブースター']]},  
+{n:'シールド（グフ）',cat:'シールド',owner:'グフ',dlc:1},  
+{n:'シールド（ウイング）',cat:'シールド',owner:'ウイングガンダム',d:[['曲面型シールド（ジム・コマンド）','曲面型シールド（ジム・カスタム）']]},  
+{n:'シールド（ウイングEW版）',cat:'シールド',owner:'ウイングガンダム（EW版）',d:[['シールド（ウイング）','シールド（ZプラスA1）']]},  
+{n:'ウイングシールド',cat:'シールド',owner:'ウイングガンダムプロトゼロ（EW版）',d:[['シールド（ウイング）','シールド（ZプラスA1）']]},  
+{n:'シールド（エピオン）',cat:'シールド',owner:'ガンダムエピオン',d:[['シールド（ウイングEW版）','シールド（サンドロックEW版）']]},  
+{n:'シールド（AGE-2）',cat:'シールド',owner:'ガンダムAGE-2ノーマル',d:[['シールド（Z）','シールド（Mk-Ⅱエゥーゴ仕様）']]},  
+{n:'シールド（ライトニングガンダム）',cat:'シールド',owner:'ライトニングガンダム',d:[['シールド（ZプラスA1）']]},  
+{n:'シールド（∀）',cat:'シールド',owner:'∀ガンダム',d:[['曲面型シールド（ジム・カスタム）','曲面型シールド（ジム・コマンド）']]},  
+{n:'GNシールド（エクシア）',cat:'シールド',owner:'ガンダムエクシア',d:[['シールド（ガンダム）','シールド（ジム）']]},  
+{n:'GNシールド（キュリオス）',cat:'シールド',owner:'ガンダムキュリオス',d:[['GNシールド（エクシア）']]},  
+{n:'GNシールド（GN-X）',cat:'シールド',owner:'GN-X',d:[['GNシールド（エクシア）']]},  
+{n:'GNシールド（GN-XⅢ）',cat:'シールド',owner:'GN-XⅢ',d:[['GNシールド（GN-X）']]},  
+{n:'GNシールド（ダブルオー）',cat:'シールド',owner:'ダブルオーガンダム',d:[['GNシールド（エクシア）']]},  
+{n:'GNシールド（アルケー）',cat:'シールド',owner:'アルケーガンダム',dlc:1},  
+{n:'ミサイル・シールド',cat:'シールド',owner:'ギャン',d:[['シールド（ガンダム）','シールド（グフ）']]},  
+{n:'シールド（ギラ・ドーガ）',cat:'シールド',owner:'ギラ・ドーガ',d:[['シールド（ガンダム）','シールド（グフ）']]},  
+{n:'シールド（レズン専用ギラ・ドーガ）',cat:'シールド',owner:'レズン専用ギラ・ドーガ',d:[['シールド（ギラ・ドーガ）','シールド（シャア専用ゲルググ）']]},  
+{n:'シールド（シャア専用ゲルググ）',cat:'シールド',owner:'シャア専用ゲルググ',d:[['シールド（ガンダム）','シールド（グフ）']]},  
+{n:'シールド（ジョニー・ライデン専用ゲルググ）',cat:'シールド',owner:'ジョニー・ライデン専用高機動型ゲルググ',d:[['シールド（エピオン）','シールド（シャア専用ゲルググ）']]},  
+{n:'シールド（ギュネイ専用ヤクト・ドーガ）',cat:'シールド',owner:'ギュネイ専用ヤクト・ドーガ',d:[['シールド（ギラ・ドーガ）','シールド（シャア専用ゲルググ）']]},  
+{n:'シールド（クェス専用ヤクト・ドーガ）',cat:'シールド',owner:'クェス専用ヤクト・ドーガ',d:[['シールド（ギュネイ専用ヤクト・ドーガ）']]},  
+{n:'シールド（シナンジュ）',cat:'シールド',owner:'シナンジュ',d:[['シールド（ユニコーン）']]},  
+{n:'シールド（ユニコーン）',cat:'シールド',owner:'ユニコーンガンダム',d:[['曲面型シールド（ジム・コマンド）','シールド（GP01）']]},  
+{n:'シールド（バンシィ）',cat:'シールド',owner:'バンシィ',d:[['曲面型シールド（ジム・コマンド）','シールド（GP01）']]},  
+{n:'アームド・アーマーDE（バンシィ）',cat:'シールド',owner:'バンシィ',d:[['シールド（バンシィ）']]},  
+{n:'アームド・アーマーDE（ユニコーン）',cat:'シールド',owner:'ユニコーンガンダム',d:[['シールド（ユニコーン）']]},  
+{n:'シールド（サザビー）',cat:'シールド',owner:'サザビー',d:[['シールド（クェス専用ヤクト・ドーガ）','シールド（シナンジュ）']]},  
+{n:'シールド（パラス・アテネ）',cat:'シールド',owner:'パラス・アテネ',d:[['GNシールド（GN-X）']]},  
+{n:'シールド（ローゼン・ズール）',cat:'シールド',owner:'ローゼン・ズール',d:[['シールド（パラス・アテネ）']]},  
+{n:'シェンロンシールド',cat:'シールド',owner:'シェンロンガンダム',d:[['シールド（パラス・アテネ）']]},  
+{n:'シェンロンシールド（EW版）',cat:'シールド',owner:'シェンロンガンダム（EW版）',d:[['シェンロンシールド','ミサイル・シールド']]},  
+{n:'シールド（サンドロックEW版）',cat:'シールド',owner:'ガンダムサンドロック（EW版）',d:[['シェンロンシールド','ミサイル・シールド']]},  
+{n:'耐ビームコーティングマント',cat:'シールド',owner:'ガンダムサンドロック改（EW版）',d:[['シールド（ウイングEW版）','シールド（サンドロックEW版）']]},  
+{n:'対ビームシールド（ストライク）',cat:'シールド',owner:'ストライクガンダム',d:[['シールド（ジム）','対ビームシールド（レッドフレーム）']]},  
+{n:'対ビームシールド（ストライクルージュ）',cat:'シールド',owner:'ストライクルージュ',d:[['対ビームシールド（ストライク）','対ビームシールド（レッドフレーム）']]},  
+{n:'対ビームシールド（デュエル）',cat:'シールド',owner:'デュエルガンダム',d:[['対ビームシールド（ストライク）','対ビームシールド（レッドフレーム）']]},  
+{n:'対ビームシールド（イージス）',cat:'シールド',owner:'イージスガンダム',dlc:1},  
+{n:'機動防盾',cat:'シールド',owner:'インパルスガンダム',d:[['対ビームシールド（ストライク）','対ビームシールド（レッドフレーム）']]},  
+{n:'コンバインシールド',cat:'シールド',owner:'ストライクルージュ',d:[['ガトリング・シールド']]},  
+{n:'ラミネートアンチビームシールド（フリーダム）',cat:'シールド',owner:'フリーダムガンダム',d:[['対ビームシールド（ストライク）','対ビームシールド（レッドフレーム）']]},  
+{n:'ラミネートアンチビームシールド（ジャスティス）',cat:'シールド',owner:'ジャスティスガンダム',d:[['対ビームシールド（ストライク）','ラミネートアンチビームシールド（フリーダム）']]},  
+{n:'アンチビームシールド',cat:'シールド',owner:'デスティニーガンダム',d:[['機動防盾（展開）','ラミネートアンチビームシールド（フリーダム）']]},  
+{n:'ビームキャリーシールド',cat:'シールド',owner:'インフィニットジャスティスガンダム',d:[['対ビームシールド（ストライク）','ラミネートアンチビームシールド（ジャスティス）']]},  
+{n:'試製71式防盾',cat:'シールド',owner:'アカツキ',d:[['対ビームシールド（ストライク）','対ビームシールド（ストライクルージュ）']]},  
+{n:'フォールディング・シールド',cat:'シールド',owner:'ガンダム試作3号機ステイメン',d:[['曲面型シールド（ジム・コマンド）','シールド（GP01）']]},  
+{n:'ラジエーター・シールド',cat:'シールド',owner:'ガンダム試作2号機サイサリス',d:[['シールド（ガンダム）','シールド（陸戦型ガンダム）']]},  
+{n:'ABCマント',cat:'シールド',owner:'クロスボーン・ガンダムX1',d:[['メガ・ビーム・シールド']]},  
+{n:'ディバイダー',cat:'シールド',owner:'ガンダムXディバイダー',d:[['シールド（シャア専用ゲルググ）','フォールディング・シールド']]},  
+{n:'ディフェンスプレート',cat:'シールド',owner:'ガンダムダブルエックス',d:[['ディバイダー']]},  
+{n:'メガ・ビーム・シールド',cat:'シールド',owner:'V2アサルトガンダム',d:[['GNシールド（エクシア）']]},  
+{n:'チョバム・シールド',cat:'シールド',owner:'ビルドストライクガンダムフルパッケージ',d:[['対ビームシールド（ストライク）','対ビームシールド（レッドフレーム）']]},  
+{n:'シールド（ビギニング30）',cat:'シールド',owner:'ビギニング30ガンダム',dlc:1},  
+{n:'フィールドシールド',cat:'シールド',owner:'ビギニング30ガンダム',dlc:1},  
+{n:'サブナックル',cat:'シールド',owner:'ガンダムアスタロト',dlc:1},  
+{n:'コンポジット・シールド・ブースター',cat:'シールド',owner:'ガンダムTR-6[ウーンドウォート]',dlc:1},  
+{n:'シールド（グシオンリベイク）',cat:'シールド',owner:'ガンダムグシオンリベイク',dlc:1},  
+{n:'シールド（リバウ）',cat:'シールド',owner:'リバウ',dlc:1},  
+{n:'シールド（モビルワーカー）',cat:'シールド',owner:'モビルワーカー',dlc:1},  
+{n:'アメイジングレヴA',cat:'シールド',owner:'—',dlc:1}  
+]};  
+  
+// =============================================  
+// ロジック  
+// =============================================  
+var PART_DEFS=[{k:'HEAD',l:'ヘッド',i:'🪖'},{k:'BODY',l:'ボディ',i:'🛡'},{k:'ARM',l:'アーム',i:'💪'},{k:'LEG',l:'レッグ',i:'🦵'},{k:'BACK',l:'バックパック',i:'🎒'}];  
+var ROWS=['すべて','ア','カ','サ','タ','ナ','ハ','マ','ヤ','ラ'];  
+var curMode='gunpla',curPage='gunpla',selG=null,selP=null;  
+var curRow='すべて',curWCat='すべて';  
+  
+function $$(id){return document.getElementById(id)}  
+  
+// 機体の特定部位に対するレシピを取得  
+function getRecipes(g, partKey){  
+  var recipes=[];  
+  // 全部位共通レシピ  
+  if(g.d && g.d.length) recipes=recipes.concat(g.d);  
+  // 部位別レシピ  
+  if(g.ps && g.ps[partKey]) recipes=recipes.concat(g.ps[partKey]);  
+  return recipes;  
+}  
+  
+// 部位にデータがあるか  
+function hasPartData(g, partKey){  
+  if(g.dlc) return true;  
+  if(g.shop) return true;  
+  if(g.d && g.d.length) return true;  
+  if(g.ps && g.ps[partKey] && g.ps[partKey].length) return true;  
+  return false;  
+}  
+  
+function switchMode(mode){  
+  curMode=mode;  
+  ['gunpla','melee','shoot','shield'].forEach(function(m){  
+    $$('mt-'+m).classList[m===mode?'add':'remove']('on');  
+  });  
+  if(mode==='gunpla'){  
+    curPage='gunpla'; selG=null; selP=null;  
+    $$('pg-gunpla').style.display=''; $$('pg-part').style.display='none'; $$('pg-gresult').style.display='none';  
+    $$('pg-weapons').style.display='none'; $$('pg-wresult').style.display='none';  
+    $$('steps-wrap').style.display='';  
+    initGMode();  
+  } else {  
+    curPage='weapons';  
+    $$('pg-gunpla').style.display='none'; $$('pg-part').style.display='none'; $$('pg-gresult').style.display='none';  
+    $$('pg-weapons').style.display=''; $$('pg-wresult').style.display='none';  
+    $$('steps-wrap').style.display='none';  
+    initWMode(mode);  
+  }  
+  updateBC();  
+}  
+  
+function initGMode(){  
+  var tabs=$$('g-tabs');  
+  tabs.innerHTML=ROWS.map(function(r){return'<button class="tab'+(r===curRow?' on':'')+'" onclick="setGRow(\''+r+'\',this)">'+r+'</button>';}).join('');  
+  renderGGrid();  
+}  
+  
+function setGRow(r,btn){  
+  curRow=r;  
+  document.querySelectorAll('#g-tabs .tab').forEach(function(t){t.classList.remove('on');});  
+  btn.classList.add('on'); renderGGrid();  
+}  
+  
+function renderGGrid(){  
+  var q=$$('g-search').value;  
+  var filtered=GD.filter(function(g){return(!q||g.n.indexOf(q)>=0)&&(curRow==='すべて'||g.r===curRow);});  
+  if(!filtered.length){$$('g-grid').innerHTML='<div class="no-result">🤖 見つかりません</div>';return;}  
+  $$('g-grid').innerHTML=filtered.map(function(g){  
+    return'<div class="card" onclick="selGunpla(\''+esc(g.n)+'\')"><div class="card-name">'+g.n+'</div>'+(g.dlc?'<div class="card-dlc">💎 DLC</div>':'')+'</div>';  
+  }).join('');  
+}  
+  
+function selGunpla(name){  
+  selG=GD.find(function(g){return g.n===name;});  
+  if(!selG) return;  
+  curPage='part'; $$('sel-gname').textContent=selG.n;  
+  $$('part-grid').innerHTML=PART_DEFS.map(function(p){  
+    var has=hasPartData(selG,p.k);  
+    return'<button class="part-btn'+(has?'':' no-data')+'"'+(has?' onclick="selPart(\''+p.k+'\')"':'')+'>'+  
+      '<span class="part-ico">'+p.i+'</span><div class="part-lbl">'+p.l+'</div>'+  
+      (has?'':'<div class="part-note">データなし</div>')+  
+    '</button>';  
+  }).join('');  
+  $$('pg-gunpla').style.display='none'; $$('pg-part').style.display=''; $$('pg-gresult').style.display='none';  
+  updateSteps(2); updateBC(); window.scrollTo(0,0);  
+}  
+  
+function selPart(pk){  
+  selP=pk; curPage='gresult';  
+  $$('pg-part').style.display='none'; $$('pg-gresult').style.display='';  
+  renderGResult(); updateSteps(3); updateBC(); window.scrollTo(0,0);  
+}  
+  
+function goTo(pg){  
+  if(pg==='gunpla'){  
+    curPage='gunpla'; selG=null; selP=null;  
+    $$('pg-gunpla').style.display=''; $$('pg-part').style.display='none'; $$('pg-gresult').style.display='none';  
+    updateSteps(1);  
+  } else if(pg==='part'){  
+    curPage='part';  
+    $$('pg-part').style.display=''; $$('pg-gresult').style.display='none';  
+    updateSteps(2);  
+  } else if(pg==='weapons'){  
+    curPage='weapons';  
+    $$('pg-weapons').style.display=''; $$('pg-wresult').style.display='none';  
+  }  
+  updateBC(); window.scrollTo(0,0);  
+}  
+  
+function renderGResult(){  
+  var g=selG, pd=PART_DEFS.find(function(p){return p.k===selP;});  
+  var recipes=getRecipes(g,selP);  
+  var planKey='gunpla:'+g.n+':'+selP;  
+  var html='<div class="result-card ac-border"><div class="r-title">'+pd.i+' '+g.n+' &mdash; '+pd.l+'</div>';  
+  if(g.dlc){  
+    html+='<span class="tag tag-dlc">💎 DLC必須パックで入手</span>';  
+  } else {  
+    if(g.shop) html+='<div class="r-sec">🏪 ショップ購入</div><span class="tag tag-shop">🏪 ショップで購入可能</span>';  
+    if(recipes.length){  
+      html+='<div class="r-sec">⚗️ 派生合成</div><div class="derive-box">';  
+      recipes.forEach(function(from,i){  
+        html+='<div class="d-row"><div class="d-num">'+(i+1)+'</div><div class="d-text"><span class="d-from">'+  
+          from.map(function(src){return renderSrcChip(src,'gunpla');}).join('<span style="color:var(--ac2);margin:0 3px">＋</span>')+  
+        '</span><span class="d-arrow">→</span><span class="d-to">'+g.n+' '+pd.l+'</span></div></div>';  
+      });  
+      html+='</div>';  
+    }  
+    if(!g.shop && !recipes.length){  
+      html+='<span class="tag tag-drop">🎯 ミッションドロップ</span>';  
+      html+='<div class="info-box"><strong>ヒント：</strong>ミッションでドロップするか、バウンティハンターモードで入手してください</div>';  
+    }  
+    if(g.shop && !recipes.length){  
+      html+='<div class="info-box"><strong>ヒント：</strong>同部位のパーツを集めるとショップに並びます</div>';  
+    }  
+  }  
+  html+='<button class="add-plan-btn" onclick="addToPlan(\''+esc(planKey)+'\',this)">＋ クラフトプランに追加</button>';  
+  html+='</div>';  
+  $$('g-result').innerHTML=html;  
+}  
+  
+// 派生元名をリンク付きチップとして描画  
+function renderSrcChip(src, mode){  
+  var baseName=src.replace(/（[^）]*）/g,'').replace(/※.*/,'').trim();  
+  var partHint=src.match(/（([^）]+)）/);  
+  var partLabel=partHint?partHint[1]:'';  
+  // 機体か武器か検索  
+  var sg=GD.find(function(g){return g.n===baseName||src.startsWith(g.n);});  
+  var sw=null;  
+  if(!sg && mode!=='gunpla'){  
+    var wdata=WD[mode]||[];  
+    sw=wdata.find(function(w){return w.n===baseName||src.startsWith(w.n);});  
+  }  
+  // 武器モードでも全カテゴリ検索  
+  if(!sg && !sw){  
+    ['melee','shoot','shield'].forEach(function(m){  
+      if(sw) return;  
+      sw=(WD[m]||[]).find(function(w){return w.n===baseName||src.startsWith(w.n);});  
+      if(sw) sw._mode=m;  
+    });  
+  }  
+  var hasLink=sg||sw;  
+  var onClick='';  
+  if(sg) onClick='onclick="navToGunpla(\''+esc(sg.n)+'\')"';  
+  else if(sw) onClick='onclick="navToWeapon(\''+esc(sw.n)+'\',\''+(sw._mode||mode)+'\')"';  
+  
+  var tagHtml='';  
+  if(sg){  
+    if(sg.dlc) tagHtml='<span class="tag tag-dlc" style="padding:2px 6px;font-size:10px">DLC</span>';  
+    else if(sg.shop) tagHtml='<span class="tag tag-shop" style="padding:2px 6px;font-size:10px">ショップ</span>';  
+    else tagHtml='<span class="tag tag-derive" style="padding:2px 6px;font-size:10px">派生</span>';  
+  } else if(sw){  
+    if(sw.dlc) tagHtml='<span class="tag tag-dlc" style="padding:2px 6px;font-size:10px">DLC</span>';  
+    else if(sw.shop) tagHtml='<span class="tag tag-shop" style="padding:2px 6px;font-size:10px">ショップ</span>';  
+    else tagHtml='<span class="tag tag-derive" style="padding:2px 6px;font-size:10px">派生</span>';  
+  } else {  
+    tagHtml='<span class="tag tag-drop" style="padding:2px 6px;font-size:10px">ドロップ</span>';  
+  }  
+  return '<span class="src-chip'+(hasLink?' src-chip-link':'')+'" '+(hasLink?onClick:'')+' style="display:inline-flex;align-items:center;gap:4px;background:var(--s2);border:1px solid '+(hasLink?'rgba(0,212,255,.3)':'var(--bd)')+';border-radius:5px;padding:3px 7px;margin:1px;cursor:'+(hasLink?'pointer':'default')+'">'+  
+    '<span style="font-size:11px;font-weight:700;color:var(--gold)">'+src+'</span>'+  
+    tagHtml+  
+    (hasLink?'<span style="color:var(--ac);font-size:10px">›</span>':'')+  
+  '</span>';  
+}  
+  
+// ===== 武器・シールドモード =====  
+var W_CATS={  
+  melee:['すべて','サーベル','ダブルサーベル','大剣','ツインブレード','アックス','ランス'],  
+  shoot:['すべて','ライフル','ダブルライフル','ロングライフル','バズーカ'],  
+  shield:['すべて','シールド']  
+};  
+  
+function initWMode(mode){  
+  var cats=W_CATS[mode]||['すべて'];  
+  curWCat='すべて';  
+  $$('w-cats').innerHTML=cats.map(function(c){  
+    return'<button class="cat-tab'+(c==='すべて'?' on':'')+'" onclick="setWCat(\''+esc(c)+'\',this)">'+c+'</button>';  
+  }).join('');  
+  var lbl={melee:'近接武器',shoot:'射撃武器',shield:'シールド'};  
+  $$('w-sec-lbl').textContent=lbl[mode]+'を選ぶ';  
+  $$('w-back-btn').textContent='← '+lbl[mode]+'一覧に戻る';  
+  $$('w-search').value='';  
+  renderWGrid();  
+}  
+  
+function setWCat(c,btn){  
+  curWCat=c;  
+  document.querySelectorAll('#w-cats .cat-tab').forEach(function(t){t.classList.remove('on');});  
+  btn.classList.add('on'); renderWGrid();  
+}  
+  
+function renderWGrid(){  
+  var q=$$('w-search').value;  
+  var data=WD[curMode]||[];  
+  var filtered=data.filter(function(w){  
+    var mq=!q||(w.n.indexOf(q)>=0||(w.owner&&w.owner.indexOf(q)>=0));  
+    var mc=curWCat==='すべて'||w.cat===curWCat;  
+    return mq&&mc;  
+  });  
+  // dedupe  
+  var seen={};  
+  filtered=filtered.filter(function(w){if(seen[w.n]) return false; seen[w.n]=1; return true;});  
+  if(!filtered.length){$$('w-grid').innerHTML='<div class="no-result">🔍 見つかりません</div>';return;}  
+  $$('w-grid').innerHTML=filtered.map(function(w){  
+    return'<div class="card" onclick="selWeapon(\''+esc(w.n)+'\')">'+  
+      '<div class="card-name">'+w.n+'</div>'+  
+      (w.owner?'<div class="card-sub">'+w.owner+'</div>':'')+  
+      (w.dlc?'<div class="card-dlc">💎 DLC</div>':'')+  
+    '</div>';  
+  }).join('');  
+}  
+  
+function selWeapon(name){  
+  var data=WD[curMode]||[];  
+  var w=data.find(function(x){return x.n===name;});  
+  if(!w) return;  
+  curPage='wresult';  
+  $$('pg-weapons').style.display='none'; $$('pg-wresult').style.display='';  
+  renderWResult(w); updateBC(); window.scrollTo(0,0);  
+}  
+  
+function renderWResult(w){  
+  var planKey='weapon:'+curMode+':'+w.n;  
+  var html='<div class="result-card ac-border"><div class="r-title">'+w.n+'</div>';  
+  if(w.owner) html+='<div style="font-size:11px;color:var(--dim);margin-bottom:10px">機体：'+w.owner+'</div>';  
+  if(w.dlc){  
+    html+='<span class="tag tag-dlc">💎 DLC必須パックで入手</span>';  
+  } else {  
+    if(w.shop) html+='<div class="r-sec">🏪 ショップ購入</div><span class="tag tag-shop">🏪 ショップ / ミッションで入手</span>';  
+    if(w.d && w.d.length){  
+      html+='<div class="r-sec">⚗️ 派生合成</div><div class="derive-box">';  
+      w.d.forEach(function(from,i){  
+        html+='<div class="d-row"><div class="d-num">'+(i+1)+'</div><div class="d-text"><span class="d-from">'+  
+          from.map(function(src){return renderSrcChip(src,curMode);}).join('<span style="color:var(--ac2);margin:0 3px">＋</span>')+  
+        '</span><span class="d-arrow">→</span><span class="d-to">'+w.n+'</span></div></div>';  
+      });  
+      html+='</div>';  
+    }  
+    if(!w.shop && !(w.d&&w.d.length)){  
+      html+='<span class="tag tag-drop">🎯 ミッションドロップ</span>';  
+    }  
+  }  
+  html+='<button class="add-plan-btn" onclick="addToPlan(\''+esc(planKey)+'\',this)">＋ クラフトプランに追加</button>';  
+  html+='</div>';  
+  $$('w-result').innerHTML=html;  
+}  
+  
+function updateSteps(n){  
+  if(curMode!=='gunpla'){$$('steps-wrap').style.display='none';return;}  
+  $$('steps-wrap').style.display='';  
+  [1,2,3].forEach(function(i){  
+    var el=$$('st'+i);  
+    el.className='step'+(i<n?' done':i===n?' active':'');  
+  });  
+}  
+  
+function updateBC(){  
+  var bc='';  
+  if(curMode==='gunpla'){  
+    if(curPage==='gunpla') bc='<span class="bc-now">機体選択</span>';  
+    else if(curPage==='part') bc='<span class="bc-link" onclick="goTo(\'gunpla\')">機体選択</span><span class="bc-sep">›</span><span class="bc-now">'+(selG?selG.n:'')+'</span>';  
+    else{var pl=PART_DEFS.find(function(p){return p.k===selP;});bc='<span class="bc-link" onclick="goTo(\'gunpla\')">機体選択</span><span class="bc-sep">›</span><span class="bc-link" onclick="goTo(\'part\')">'+(selG?selG.n:'')+'</span><span class="bc-sep">›</span><span class="bc-now">'+(pl?pl.l:'')+'</span>';}  
+  } else {  
+    var lbl={melee:'近接武器',shoot:'射撃武器',shield:'シールド'}[curMode];  
+    if(curPage==='weapons') bc='<span class="bc-now">'+lbl+'</span>';  
+    else bc='<span class="bc-link" onclick="goTo(\'weapons\')">'+lbl+'</span><span class="bc-sep">›</span><span class="bc-now">詳細</span>';  
+  }  
+  $$('bc').innerHTML=bc;  
+}  
+  
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}  
+  
+// ===== ナビゲーション（派生元リンクジャンプ）=====  
+var navStack=[];  
+  
+function navToGunpla(name){  
+  // 現在地をスタックに積む  
+  navStack.push({mode:curMode,page:curPage,selG:selG,selP:selP,scrollY:window.scrollY});  
+  selG=GD.find(function(g){return g.n===name;});  
+  if(!selG) return;  
+  curMode='gunpla';  
+  ['gunpla','melee','shoot','shield'].forEach(function(m){$$('mt-'+m).classList[m==='gunpla'?'add':'remove']('on');});  
+  $$('pg-gunpla').style.display='none';  
+  $$('pg-part').style.display='none';  
+  $$('pg-gresult').style.display='none';  
+  $$('pg-weapons').style.display='none';  
+  $$('pg-wresult').style.display='none';  
+  $$('steps-wrap').style.display='';  
+  // 部位選択画面へ  
+  curPage='part';  
+  $$('sel-gname').textContent=selG.n;  
+  $$('part-grid').innerHTML=PART_DEFS.map(function(p){  
+    var has=hasPartData(selG,p.k);  
+    return'<button class="part-btn'+(has?'':' no-data')+'"'+(has?' onclick="selPart(\''+p.k+'\')"':'')+'>'+  
+      '<span class="part-ico">'+p.i+'</span><div class="part-lbl">'+p.l+'</div>'+  
+      (has?'':'<div class="part-note">データなし</div>')+  
+    '</button>';  
+  }).join('');  
+  $$('pg-part').style.display='';  
+  updateSteps(2); updateBC(); window.scrollTo(0,0);  
+  renderNavBack();  
+}  
+  
+function navToWeapon(name,mode){  
+  navStack.push({mode:curMode,page:curPage,selG:selG,selP:selP,scrollY:window.scrollY});  
+  var wdata=WD[mode]||[];  
+  var w=wdata.find(function(x){return x.n===name;});  
+  if(!w) return;  
+  curMode=mode;  
+  ['gunpla','melee','shoot','shield'].forEach(function(m){$$('mt-'+m).classList[m===mode?'add':'remove']('on');});  
+  $$('pg-gunpla').style.display='none';  
+  $$('pg-part').style.display='none';  
+  $$('pg-gresult').style.display='none';  
+  $$('pg-wresult').style.display='';  
+  $$('pg-weapons').style.display='none';  
+  $$('steps-wrap').style.display='none';  
+  curPage='wresult';  
+  renderWResult(w); updateBC(); window.scrollTo(0,0);  
+  renderNavBack();  
+}  
+  
+function renderNavBack(){  
+  var old=document.getElementById('nav-back-bar');  
+  if(old) old.remove();  
+  if(!navStack.length) return;  
+  var div=document.createElement('div');  
+  div.id='nav-back-bar';  
+  div.style.cssText='padding:0 0 8px 0;';  
+  div.innerHTML='<button onclick="navBack()" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:8px 13px;color:var(--ac);font-size:12px;font-family:inherit;cursor:pointer;font-weight:700;width:100%;text-align:left">◀ 前のページに戻る（'+(navStack.length)+'段階）</button>';  
+  document.querySelector('.body').prepend(div);  
+}  
+  
+function navBack(){  
+  var prev=navStack.pop();  
+  if(!prev) return;  
+  var old=document.getElementById('nav-back-bar');  
+  if(old) old.remove();  
+  curMode=prev.mode; selG=prev.selG; selP=prev.selP; curPage=prev.page;  
+  // モードタブ更新  
+  ['gunpla','melee','shoot','shield'].forEach(function(m){$$('mt-'+m).classList[m===curMode?'add':'remove']('on');});  
+  // 画面復元  
+  $$('pg-gunpla').style.display='none';  
+  $$('pg-part').style.display='none';  
+  $$('pg-gresult').style.display='none';  
+  $$('pg-weapons').style.display='none';  
+  $$('pg-wresult').style.display='none';  
+  $$('steps-wrap').style.display=curMode==='gunpla'?'':'none';  
+  if(curMode==='gunpla'){  
+    if(curPage==='gunpla'){$$('pg-gunpla').style.display='';updateSteps(1);}  
+    else if(curPage==='part'){$$('pg-part').style.display='';updateSteps(2);}  
+    else{$$('pg-gresult').style.display='';renderGResult();updateSteps(3);}  
+  } else {  
+    if(curPage==='weapons'){$$('pg-weapons').style.display='';}  
+    else{$$('pg-wresult').style.display='';}  
+  }  
+  updateBC();  
+  if(navStack.length) renderNavBack();  
+  setTimeout(function(){window.scrollTo(0,prev.scrollY);},50);  
+}  
+  
+// ===== クラフトプラン =====  
+var craftPlans={}; // key -> {label, checks:{nodeId:bool}}  
+var craftChecks={}; // nodeId -> bool  
+  
+function getPlanLabel(key){  
+  var parts=key.split(':');  
+  if(parts[0]==='gunpla'){  
+    var partLabel=(PART_DEFS.find(function(p){return p.k===parts[2];})||{l:parts[2]}).l;  
+    return parts[1]+' '+partLabel;  
+  } else {  
+    return parts[2];  
+  }  
+}  
+  
+// planKey から素材ツリーを構築  
+function buildCraftTree(key, depth, visited){  
+  depth=depth||0; visited=visited||{};  
+  if(visited[key]) return [];  
+  visited[key]=true;  
+  var parts=key.split(':');  
+  var nodes=[];  
+  
+  if(parts[0]==='gunpla'){  
+    var gname=parts[1], pk=parts[2];  
+    var g=GD.find(function(x){return x.n===gname;});  
+    if(!g) return nodes;  
+    // pkがALLの場合は「この機体パーツ全般」として扱う（素材ノード）  
+    var recipes= pk==='ALL' ? (g.d||[]) : getRecipes(g,pk);  
+    var partLbl= pk==='ALL' ? 'パーツ' : (PART_DEFS.find(function(p){return p.k===pk;})||{l:pk}).l;  
+    var label=gname+(pk!=='ALL'?' '+partLbl:'');  
+    var how=g.dlc?'DLC':g.shop?'ショップ購入':recipes.length?'派生合成':'ドロップ';  
+    nodes.push({id:key,label:label,how:how,depth:depth,type:'gunpla',gname:gname,pk:pk,dlc:!!g.dlc,shop:!!g.shop,hasDerives:recipes.length>0});  
+    if(recipes.length && depth<4){  
+      var recipe=recipes[0];  
+      recipe.forEach(function(src){  
+        var baseName=src.replace(/（[^）]*）/g,'').replace(/※.*/,'').trim();  
+        var sg=GD.find(function(x){return x.n===baseName||src.startsWith(x.n);});  
+        if(sg){  
+          var childKey='gunpla:'+sg.n+':ALL';  
+          nodes=nodes.concat(buildCraftTree(childKey,depth+1,visited));  
+        } else {  
+          nodes.push({id:key+'_src_'+src,label:src,how:'ドロップ/ショップ',depth:depth+1,type:'src',leaf:true});  
+        }  
+      });  
+    }  
+  
+  } else if(parts[0]==='weapon'){  
+    var wmode=parts[1],wname=parts[2];  
+    var wdata=WD[wmode]||[];  
+    var w=wdata.find(function(x){return x.n===wname;});  
+    if(!w) return nodes;  
+    var how=w.dlc?'DLC':w.shop?'ショップ購入':w.d&&w.d.length?'派生合成':'ドロップ';  
+    nodes.push({id:key,label:wname+(w.owner?' ('+w.owner+')':''),how:how,depth:depth,type:'weapon',wmode:wmode,wname:wname,dlc:!!w.dlc,shop:!!w.shop,hasDerives:!!(w.d&&w.d.length)});  
+    if(w.d&&w.d.length&&depth<4){  
+      var recipe=w.d[0];  
+      recipe.forEach(function(src){  
+        var sw=null,swmode=wmode;  
+        ['melee','shoot','shield'].forEach(function(m){  
+          if(sw) return;  
+          var f=(WD[m]||[]).find(function(x){return x.n===src;});  
+          if(f){sw=f;swmode=m;}  
+        });  
+        if(sw){  
+          nodes=nodes.concat(buildCraftTree('weapon:'+swmode+':'+sw.n,depth+1,visited));  
+        } else {  
+          nodes.push({id:key+'_src_'+src,label:src,how:'ドロップ/ショップ',depth:depth+1,type:'src',leaf:true});  
+        }  
+      });  
+    }  
+  }  
+  return nodes;  
+}  
+  
+function addToPlan(key, btnEl){  
+  if(!btnEl && window.event) btnEl=window.event.currentTarget||window.event.target;  
+  if(craftPlans[key]){  
+    if(btnEl){  
+      var orig=btnEl.textContent;  
+      btnEl.textContent='すでに追加済み';  
+      setTimeout(function(){btnEl.textContent=orig;},1200);  
+    }  
+    return;  
+  }  
+  craftPlans[key]={label:getPlanLabel(key)};  
+  updatePlanBadge();  
+  if(btnEl){  
+    btnEl.textContent='✓ 追加しました！';  
+    btnEl.style.background='rgba(61,255,170,.15)';  
+    btnEl.style.borderColor='rgba(61,255,170,.5)';  
+    btnEl.style.color='var(--grn)';  
+    setTimeout(function(){  
+      btnEl.textContent='＋ クラフトプランに追加';  
+      btnEl.style.background=''; btnEl.style.borderColor=''; btnEl.style.color='';  
+    },1500);  
+  }  
+}  
+  
+function updatePlanBadge(){  
+  var count=Object.keys(craftPlans).length;  
+  var badge=$$('plan-badge');  
+  if(count>0){badge.style.display='flex';badge.textContent=count;}  
+  else{badge.style.display='none';}  
+}  
+  
+function openPlan(){  
+  $$('plan-panel').style.display='flex';  
+  renderPlanBody();  
+}  
+  
+function closePlan(){$$('plan-panel').style.display='none';}  
+function closePlanOutside(e){if(e.target===$$('plan-panel')) closePlan();}  
+  
+function renderPlanBody(){  
+  var keys=Object.keys(craftPlans);  
+  if(!keys.length){  
+    $$('plan-body').innerHTML='<div class="plan-empty">📭 まだプランがありません<br><br>パーツ詳細ページの<br>「＋ クラフトプランに追加」で<br>目標を登録できます</div>';  
+    return;  
+  }  
+  var html='';  
+  keys.forEach(function(key){  
+    var plan=craftPlans[key];  
+    var nodes=buildCraftTree(key,0,{});  
+    var total=nodes.length;  
+    var done=nodes.filter(function(n){return craftChecks[n.id];}).length;  
+    var pct=total?Math.round(done/total*100):0;  
+  
+    html+='<div class="craft-goal">';  
+    html+='<div class="craft-goal-header">';  
+    html+='<div class="craft-goal-name">🎯 '+plan.label+'</div>';  
+    html+='<button class="craft-goal-del" onclick="removePlan(\''+esc(key)+'\')">✕</button>';  
+    html+='</div>';  
+    // プログレスバー  
+    html+='<div class="craft-progress"><div class="craft-progress-bar" style="width:'+pct+'%"></div></div>';  
+    html+='<div style="font-size:10px;color:'+(pct===100?'var(--grn)':'var(--dim)')+';padding:2px 12px 8px;text-align:right">'+(pct===100?'✓ 完成！':done+'/'+total+' 完了 ('+pct+'%)')+'</div>';  
+  
+    html+='<div class="craft-tree">';  
+    nodes.forEach(function(node){  
+      var checked=!!craftChecks[node.id];  
+      var depthClass='depth-'+Math.min(node.depth,2);  
+      var doneClass=checked?' done':'';  
+      var prefix=node.depth===0?'':'　'.repeat(node.depth)+(node.depth>0?'└ ':'');  
+  
+      // 詳細リンク  
+      var linkHtml='';  
+      if(!node.leaf){  
+        if(node.type==='gunpla'){  
+          var pk2=node.pk==='ALL'?'':(':'+node.pk);  
+          linkHtml='<span class="craft-node-link" onclick="closePlan();navToGunpla(\''+esc(node.gname)+'\')">詳細 →</span>';  
+        } else if(node.type==='weapon'){  
+          linkHtml='<span class="craft-node-link" onclick="closePlan();navToWeapon(\''+esc(node.wname)+'\',\''+node.wmode+'\')">詳細 →</span>';  
+        }  
+      }  
+  
+      var howIcon={'DLC':'💎','ショップ購入':'🏪','派生合成':'⚗️','ドロップ':'🎯','ドロップ/ショップ':'🎯'}[node.how]||'🎯';  
+      var howColor={'DLC':'var(--dlc)','ショップ購入':'var(--grn)','派生合成':'var(--gold)'}[node.how]||'var(--dim)';  
+  
+      html+='<div class="craft-node '+depthClass+doneClass+'">';  
+      html+='<div class="craft-check'+(checked?' checked':'')+'" onclick="toggleCheck(\''+esc(node.id)+'\')">'+(checked?'✓':'')+'</div>';  
+      html+='<div class="craft-node-body">';  
+      html+='<div class="craft-node-name">'+(node.depth>0?'<span style="color:var(--dim)">└ </span>':'')+node.label+'</div>';  
+      html+='<div class="craft-node-how" style="color:'+howColor+'">'+howIcon+' '+node.how+'</div>';  
+      if(linkHtml) html+=linkHtml;  
+      html+='</div></div>';  
+    });  
+    html+='</div></div>';  
+  });  
+  $$('plan-body').innerHTML=html;  
+}  
+  
+function toggleCheck(nodeId){  
+  craftChecks[nodeId]=!craftChecks[nodeId];  
+  renderPlanBody();  
+}  
+  
+function removePlan(key){  
+  delete craftPlans[key];  
+  updatePlanBadge();  
+  renderPlanBody();  
+}  
+  
+// ===== init =====  
+(function(){  
+  initGMode();  
+  updateSteps(1);  
+  updateBC();  
+  initPWA();  
+})();  
+  
+function initPWA(){  
+  // アイコン画像をCanvasで生成  
+  var canvas=document.createElement('canvas');  
+  canvas.width=512; canvas.height=512;  
+  var ctx=canvas.getContext('2d');  
+  // 背景  
+  var bg=ctx.createLinearGradient(0,0,512,512);  
+  bg.addColorStop(0,'#0b0e17');  
+  bg.addColorStop(1,'#0d1928');  
+  ctx.fillStyle=bg;  
+  ctx.beginPath();  
+  ctx.roundRect(0,0,512,512,80);  
+  ctx.fill();  
+  // ヘキサゴン  
+  ctx.save();  
+  ctx.translate(256,220);  
+  ctx.beginPath();  
+  var r=110;  
+  for(var i=0;i<6;i++){  
+    var a=Math.PI/180*(60*i-30);  
+    i===0?ctx.moveTo(r*Math.cos(a),r*Math.sin(a)):ctx.lineTo(r*Math.cos(a),r*Math.sin(a));  
+  }  
+  ctx.closePath();  
+  var hg=ctx.createLinearGradient(-r,-r,r,r);  
+  hg.addColorStop(0,'#00d4ff');  
+  hg.addColorStop(1,'#0050ff');  
+  ctx.fillStyle=hg;  
+  ctx.fill();  
+  // ⚙ アイコン  
+  ctx.fillStyle='#fff';  
+  ctx.font='bold 100px sans-serif';  
+  ctx.textAlign='center';  
+  ctx.textBaseline='middle';  
+  ctx.fillText('⚙',0,0);  
+  ctx.restore();  
+  // テキスト  
+  ctx.fillStyle='#00d4ff';  
+  ctx.font='bold 52px monospace';  
+  ctx.textAlign='center';  
+  ctx.textBaseline='middle';  
+  ctx.fillText('GB3',256,370);  
+  ctx.fillStyle='#4a6080';  
+  ctx.font='bold 28px monospace';  
+  ctx.fillText('PARTS NAV',256,420);  
+  
+  var iconDataUrl=canvas.toDataURL('image/png');  
+  
+  // apple-touch-icon  
+  var appleIcon=document.getElementById('apple-icon');  
+  appleIcon.href=iconDataUrl;  
+  
+  // manifest をBlobで生成  
+  var manifest={  
+    name:'GB3 パーツナビ',  
+    short_name:'GB3ナビ',  
+    description:'ガンダムブレイカー3 パーツ派生合成ナビ',  
+    start_url:'.',  
+    display:'standalone',  
+    background_color:'#0b0e17',  
+    theme_color:'#0b0e17',  
+    orientation:'portrait',  
+    icons:[  
+      {src:iconDataUrl,sizes:'512x512',type:'image/png',purpose:'any maskable'}  
+    ]  
+  };  
+  var manifestBlob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});  
+  var manifestUrl=URL.createObjectURL(manifestBlob);  
+  document.getElementById('manifest-link').href=manifestUrl;  
+  
+  // iOS Safari向け：インストールガイドを初回表示  
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);  
+  var isAndroid=/android/i.test(navigator.userAgent);  
+  var isStandalone=window.navigator.standalone||window.matchMedia('(display-mode: standalone)').matches;  
+  if(!isStandalone && (isIOS||isAndroid) && !sessionStorage.getItem('pwa-hint-shown')){  
+    sessionStorage.setItem('pwa-hint-shown','1');  
+    setTimeout(function(){showPWAHint(isIOS);},1500);  
+  }  
+}  
+  
+function showPWAHint(isIOS){  
+  var div=document.createElement('div');  
+  div.id='pwa-hint';  
+  div.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:300;background:linear-gradient(to top,#0b0e17,rgba(11,14,23,.95));border-top:1px solid #1e2d45;padding:16px 20px 32px;max-width:500px;margin:0 auto;';  
+  div.innerHTML=  
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+  
+    '<div style="font-size:13px;font-weight:900;color:#00d4ff">📲 ホーム画面に追加</div>'+  
+    '<button onclick="document.getElementById(\'pwa-hint\').remove()" style="background:none;border:none;color:#4a6080;font-size:18px;cursor:pointer;padding:2px 6px">✕</button>'+  
+    '</div>'+  
+    (isIOS  
+      ? '<div style="font-size:12px;color:#c8dcf0;line-height:1.8">'+  
+        '① 下の <strong style="color:#00d4ff">共有ボタン</strong>（□↑）をタップ<br>'+  
+        '② 「<strong style="color:#00d4ff">ホーム画面に追加</strong>」を選ぶ<br>'+  
+        '③ 「<strong style="color:#00d4ff">追加</strong>」でアプリとして起動できます</div>'  
+      : '<div style="font-size:12px;color:#c8dcf0;line-height:1.8">'+  
+        'ブラウザの <strong style="color:#00d4ff">メニュー（⋮）</strong> から<br>'+  
+        '「<strong style="color:#00d4ff">ホーム画面に追加</strong>」を選ぶと<br>'+  
+        'アプリとして起動できます</div>')+  
+    '<div style="margin-top:10px;padding:8px 12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);border-radius:7px;font-size:11px;color:#4a6080">オフラインでも動作します ✓</div>';  
+  document.body.appendChild(div);  
+  // 5秒後に自動で消える  
+  setTimeout(function(){var el=document.getElementById('pwa-hint');if(el) el.remove();},8000);  
+}  
+</script>  
+  
+</body>  
+</html>  
